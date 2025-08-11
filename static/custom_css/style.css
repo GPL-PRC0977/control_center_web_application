@@ -1,0 +1,46 @@
+/* .btn-pro-white {
+    background-image: linear-gradient(white, #fff 6%, #f0f0f0);
+    filter: none;
+    border: 1px solid #cfcece;
+} */
+
+/* .btn-pro-white {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+} */
+
+.btn-pro-white {
+    background-image: linear-gradient(var(--bs-body-bg), var(--bs-body-bg) 6%, var(--bs-secondary-bg));
+    color: var(--bs-body-color);
+    border: 1px solid rgb(227, 227, 227) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    filter: none;
+}
+.btn-pro-white:hover {
+    background-image: linear-gradient(var(--bs-body-bg), var(--bs-body-bg) 6%, var(--bs-secondary-bg));
+    color: var(--bs-body-color);
+    border: 1px solid lightgray !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    filter: none;
+}
+.bg-custom-light {
+    background-color: var(--bs-body-bg) !important;
+    border-top: 1px solid var(--bs-border-color) !important;
+    border-bottom: 1px solid var(--bs-border-color) !important;
+}
+/* Default to light mode */
+.dark-mode-visible {
+    display: none !important;
+}
+.dark-mode-hidden {
+    display: inline !important;
+}
+
+/* When Bootstrap dark theme is active */
+[data-bs-theme="dark"] .dark-mode-visible {
+    display: inline !important;
+}
+[data-bs-theme="dark"] .dark-mode-hidden {
+    display: none !important;
+}

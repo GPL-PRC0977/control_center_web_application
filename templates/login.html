@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sign-In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            top: 0;
+        }
+
+        .container {
+            margin-top: -150px;
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 9px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        a {
+            text-decoration: none;
+            color: #1a73e8;
+        }
+
+        .google-btn {
+            font-size: 16px;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .google-btn:hover {
+            background-color: #357ae8;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        {% if user %}
+        <h2>Welcome, {{ user.name }}</h2>
+        <p>Email: {{ user.email }}</p>
+        <a href="/logout">Logout</a>
+        {% else %}
+        <!-- <h2>Application Control Center</h2> -->
+        <img src="{{ url_for('static', filename='login_logo.png') }}" class="" alt="Logo" width="350" />
+        <a href="{{ url_for('login') }}">
+            <button class="google-btn">
+                <img class="google-icon" src="https://cdn-icons-png.flaticon.com/256/2702/2702602.png"
+                    alt="Google logo" />
+                Sign in with Google
+            </button>
+        </a>
+        {% endif %}
+    </div>
+</body>
+
+</html>

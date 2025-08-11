@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Control Panel</title>
+</head>
+
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="card rounded-0">
+
+        <div class="card-header p-1">
+            <a href="#" class="btn btn-sm rounded-0 p-0 ps-2 pe-2 m-0" data-bs-toggle="modal"
+                data-bs-target="#enrollapp"><i class="bi bi-window-stack me-2"></i>Enroll
+                New Application</a>
+
+            <a href="#" class="btn btn-sm rounded-0 p-0 ps-2 pe-2 m-0"><i class="bi bi-person-add me-2"></i>Enroll
+                New User</a>
+        </div>
+        <div class="card-body position-relative" style="height: calc(100vh - 85px);">
+            <!-- <img src="{{ picture }}" alt="User Picture" class="img-fluid rounded-circle"
+                style="width: 100px; height: 100px;"> -->
+        </div>
+
+        <!-- Enroll App Modal -->
+        <div class="modal fade" id="enrollapp" tabindex="-1" aria-labelledby="enrollappModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content rounded-0">
+                    <div class="modal-header bg-custom-light p-2 border-top-0">
+                        <h1 class="modal-title fs-5 ps-1" id="enrollappModal">
+                            <i class="bi bi-window-stack me-2"></i>
+                            Enroll New Application
+                        </h1>
+                        <button type="button" class="btn-close me-1" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pt-3 ps-4 pe-4">
+                        <span>
+                            Application Name:
+                            <input type="text" class="form-control form-control-sm rounded-0 mt-1">
+                        </span>
+                        <span>
+                            Application Owner:
+                            <input type="text" class="form-control form-control-sm rounded-0 mt-1">
+                        </span>
+                    </div>
+                    <div class="modal-body ps-4 pe-4">
+                        <div class="row mb-2">
+                            <div class="col-sm">
+                                <span>
+                                    <h5>Available Dimensions</h5>
+                                    <select id="moduleList" multiple size="5"
+                                        class="form-select form-select-sm rounded-0">
+                                        <!-- <option value="Status">Status</option> -->
+                                        <option value="Permissions">User Permissions</option>
+                                        <!-- <option value="Owner">Owner</option> -->
+                                        <option value="Company">Company</option>
+                                        <option value="Brand">Brand</option>
+                                        <option value="Location">Location</option>
+                                        <option value="Location">User Effectivity Date</option>
+                                        <option value="Location">User Expiration Date</option>
+                                        <option value="Location">Mall Group</option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div class="col-sm col-md-2 d-flex flex-column justify-content-center align-items-center"
+                                style="max-width: 70px;">
+                                <button onclick="addModule()" class="btn btn-sm btn-pro-white mt-3 mb-2">→</button>
+                                <button onclick="removeModule()" class="btn btn-sm btn-pro-white">←</button>
+                            </div>
+                            <div class="col-sm">
+                                <h5>Selected Dimensions</h5>
+                                <select id="selectedModules" multiple size="5"
+                                    class="form-select form-select-sm rounded-0"></select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer p-1 bg-custom-light rounded-0 border-bottom-0">
+                        <button type="button" class="btn btn-sm btn-pro-white">Save changes</button>
+                        <button type="button" class="btn btn-sm btn-pro-white" data-bs-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- End App Modal -->
+
+        <!-- Modal History -->
+        <div class="section-modal fade modal position-absolute top-0 start-0 w-100 h-100" id="staticBackdrop"
+            data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header bg-custom-light p-1 ps-2 pe-3">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">History</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal History -->
+
+
+    </div>
+    <script>
+        function addModule() {
+            const moduleList = document.getElementById("moduleList");
+            const selectedModules = document.getElementById("selectedModules");
+
+            for (let i = moduleList.options.length - 1; i >= 0; i--) {
+                const option = moduleList.options[i];
+                if (option.selected) {
+                    const newOption = document.createElement("option");
+                    newOption.value = option.value;
+                    newOption.text = option.text;
+                    selectedModules.add(newOption);
+                    moduleList.remove(i);  // Remove from available list
+                }
+            }
+        }
+
+        function removeModule() {
+            const moduleList = document.getElementById("moduleList");
+            const selectedModules = document.getElementById("selectedModules");
+
+            for (let i = selectedModules.options.length - 1; i >= 0; i--) {
+                const option = selectedModules.options[i];
+                if (option.selected) {
+                    const newOption = document.createElement("option");
+                    newOption.value = option.value;
+                    newOption.text = option.text;
+                    moduleList.add(newOption);
+                    selectedModules.remove(i);  // Remove from selected list
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
