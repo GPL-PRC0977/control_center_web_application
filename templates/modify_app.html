@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Modification</title>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+
+    <div class="card rounded-0 m-3">
+        <div class="card-header p-1 border-start-0 border-end-0 bg-light-subtle">
+            <i class="bi bi-pencil-square ms-2 me-1 align-middle"></i>
+            <strong class="align-middle">Application Details Modifier</strong>
+
+            <!-- <a href="/" class="btn btn-sm btn-pro-white float-end rounded-0">Cancel</a> -->
+            <input type="button" class="btn btn-sm btn-pro-white float-end rounded-0" onclick="window.history.back()"
+                value="Cancel">
+            <input type="button" class="btn btn-sm btn-pro-white float-end me-1 rounded-0" value="Save">
+
+        </div>
+        <!-- <div class="card-header"></div> -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6 col-sm-6">
+                    <span>
+                        Application Name:
+                        <input type="text" id="txt_application_name" class="form-control form-control-sm rounded-0 mt-1"
+                            value="{{ app_name }}" required>
+                    </span>
+                    <span>
+                        Application Link / URL:
+                        <input type="text" id="txt_application_link" class="form-control form-control-sm rounded-0 mt-1"
+                            value="{{ app_url }}" required>
+                    </span>
+                </div>
+                <div class="col-sm">
+                    <div class="rows">
+                        <div class="col">
+                            Status:
+                            <!-- <select id="select_status" class="form-select form-select-sm rounded-0 mt-1" required>
+                                <option value=""></option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select> -->
+                            <select id="select_status" class="form-select form-select-sm rounded-0 mt-1" required>
+                                <option value="" {% if not app_status %}selected{% endif %}></option>
+                                <option value="Active" {% if app_status=='True' %}selected{% endif %}>Active</option>
+                                <option value="Inactive" {% if app_status=='False' %}selected{% endif %}>Inactive
+                                </option>
+                            </select>
+
+
+                        </div>
+                        <div class="col">
+                            Owner:
+                            <input type="text" id="txt_owner" class="form-control form-control-sm rounded-0 mt-1"
+                                value="{{ app_owner }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <strong>Application Permissions</strong>
+                    <br>
+                    <span>
+                        <input type="checkbox" id="check_read" class="form-check-input" {% if perm_read in [True, 'True'
+                            , 'true' ] %}checked{% endif %}> Read<br>
+                        <input type="checkbox" id="check_write" class="form-check-input" {% if perm_write in
+                            [True, 'True' , 'true' ] %}checked{% endif %}> Write<br>
+                        <input type="checkbox" id="check_update" class="form-check-input" {% if perm_update in
+                            [True, 'True' , 'true' ] %}checked{% endif %}> Update<br>
+                        <input type="checkbox" id="check_delete" class="form-check-input" {% if perm_delete in
+                            [True, 'True' , 'true' ] %}checked{% endif %}> Delete
+                    </span>
+
+                </div>
+            </div>
+
+            <div class="row mt-2 mb-2">
+                <div class="col-sm">
+                    <span>
+                        <h5>Available Dimensions</h5>
+                        <select id="select_available_dimensions" multiple size="5"
+                            class="form-select form-select-sm rounded-0">
+                            <!-- <option value="Status">Status</option> -->
+                            <!-- <option value="Permissions">User Permissions</option> -->
+                            <!-- <option value="Owner">Owner</option> -->
+                            <option value="Company">Company</option>
+                            <option value="Brand">Brand</option>
+                            <option value="Location">Location</option>
+                            <!-- <option value="Location">User Effectivity Date</option>
+                                        <option value="Location">User Expiration Date</option> -->
+                            <option value="Location">Mall Group</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="col-sm col-md-2 d-flex flex-column justify-content-center align-items-center"
+                    style="max-width: 70px;">
+                    <button onclick="addDimension()" class="btn btn-sm btn-pro-white mt-3 mb-2 rounded-0">→</button>
+                    <button onclick="removeDimension()" class="btn btn-sm btn-pro-white rounded-0">←</button>
+                </div>
+                <div class="col-sm">
+                    <h5>Selected Dimensions</h5>
+                    <select id="select_selected_dimensions" multiple size="5"
+                        class="form-select form-select-sm rounded-0"></select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-5 pe-0">
+                    Module Name:
+                    <input type="text" id="txt_module_name" class="form-control form-control-sm rounded-0 mt-1"
+                        required>
+                </div>
+                <div class="col-6">
+                    Link / URL:
+                    <input type="text" id="txt_link_url" class="form-control form-control-sm rounded-0 mt-1" required>
+                </div>
+                <div class="col ps-0">
+                    <input type="button" class="btn btn-sm btn-pro-white mt-4 w-100 rounded-0" value="Add"
+                        onclick="addModule()">
+                </div>
+            </div>
+            <div class="bg-light-subtle rounded-0 mt-1 ps-2 pe-2 pt-1 pb-1">
+                <table id="table_modules" class="table table-sm table-bordered mt-1 table-hover"></table>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

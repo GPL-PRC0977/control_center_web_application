@@ -5,6 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Control Panel</title>
+    <style>
+        .custom-table-style thead th {
+            font-weight: normal !important;
+        }
+
+        .custom-table-style tbody {
+            font-size: 11px;
+        }
+
+        .grid-btn {
+            color: rgb(127, 126, 126);
+        }
+
+        .grid-btn-delete {
+            color: rgb(127, 126, 126);
+        }
+
+        .grid-btn:hover {
+            color: rgb(43, 42, 42);
+        }
+
+        .grid-btn-delete:hover {
+            color: red;
+        }
+    </style>
 </head>
 
 <body>
@@ -13,76 +38,249 @@
 
     <div class="card rounded-0">
 
-        <div class="card-header p-1">
+        <!-- <div class="card-header p-1 border-start-0 border-end-0">
             <a href="#" class="btn btn-sm rounded-0 p-0 ps-2 pe-2 m-0" data-bs-toggle="modal"
                 data-bs-target="#enrollapp"><i class="bi bi-window-stack me-2"></i>Enroll
                 New Application</a>
 
             <a href="#" class="btn btn-sm rounded-0 p-0 ps-2 pe-2 m-0"><i class="bi bi-person-add me-2"></i>Enroll
                 New User</a>
-        </div>
-        <div class="card-body position-relative" style="height: calc(100vh - 85px);">
+        </div> -->
+        <div class="card-body position-relative" style="height: calc(100vh - 53px);">
             <!-- <img src="{{ picture }}" alt="User Picture" class="img-fluid rounded-circle"
                 style="width: 100px; height: 100px;"> -->
+            <table class="table table-bordered table-hover table-sm custom-table-style">
+                <thead class="table-description">
+                    <th colspan="4" class="text-primary text-center bg-light-subtle p-0">Application Details</th>
+                    <th colspan="2" class="text-primary text-center bg-light-subtle p-0">Other Details</th>
+                    <th colspan="4" class="text-primary text-center bg-light-subtle p-0">Application Permission</th>
+                    <th colspan="2" class="text-primary text-center bg-light-subtle p-0">Creation Details</th>
+                    <th colspan="3" class="text-primary text-center bg-light-subtle p-0">Actions</th>
+                </thead>
+                <thead>
+                    <th class="d-none">Application ID</th>
+                    <th class="bg-light-subtle"></th>
+                    <th class="bg-light-subtle">Application Name</th>
+                    <th class="bg-light-subtle">Application Owner</th>
+                    <th class="bg-light-subtle text-center">Status</th>
+                    <th class="text-center bg-light-subtle">Dimensions</th>
+                    <th class="text-center bg-light-subtle">Modules</th>
+                    <th class="text-center bg-light-subtle">Read</th>
+                    <th class="text-center bg-light-subtle">Write</th>
+                    <th class="text-center bg-light-subtle">Update</th>
+                    <th class="text-center bg-light-subtle">Delete</th>
+                    <th class="bg-light-subtle">Created By</th>
+                    <th class="bg-light-subtle">Date Created</th>
+                    <!-- <th colspan="3" class="bg-light text-center">User / Edit / Delete</th> -->
+                    <th class="text-center bg-light-subtle" style="width: 50px;">User</th>
+                    <th class="text-center bg-light-subtle" style="width: 50px;">Edit</th>
+                    <th class="text-center bg-light-subtle" style="width: 50px;">Delete</th>
+                </thead>
+                <tbody>
+                    {% for data in master_data %}
+                    <tr>
+                        <td class="d-none">{{ data.app_id }}</td>
+                        <td class="text-center align-middle"><i class="bi bi-caret-right-fill text-primary"
+                                style="font-size: 8px;"></i></td>
+                        <td>{{ data.app_name}}</td>
+                        <td>{{ data.app_owner }}</td>
+                        <td class="text-center">
+                            {% if data.status %}
+                            <span class="badge rounded-pill text-bg-light"><label
+                                    class="text-success">Active</label></span>
+                            {% else %}
+                            <span class="badge rounded-pill text-bg-light"><label
+                                    class="text-danger">Inactive</label></span>
+                            {% endif %}
+
+                        </td>
+                        <td class="text-center text-primary"><a href="">{{ data.dimension_count }}</a></td>
+                        <td class="text-center text-primary"><a href="#" class="modules-link"
+                                data-app_id="{{ data.app_id }}">{{
+                                data.module_count }}</a></td>
+                        <td class="text-center">
+                            {% if data.can_read %}
+                            <i class="bi bi-check text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x text-danger"></i>
+                            {% endif %}
+                            <!-- {{ data.can_read }} -->
+                        </td>
+                        <td class="text-center">
+                            {% if data.can_write %}
+                            <i class="bi bi-check text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if data.can_update %}
+                            <i class="bi bi-check text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if data.can_delete %}
+                            <i class="bi bi-check text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ data.created_by }}</td>
+
+                        <td>{{ data.date_created }}</td>
+                        <td class="text-center"><a href="#" class="grid-btn"><i class="bi bi-people-fill"></i></a>
+                        </td>
+                        <td class="text-center">
+                            {% if role_type == 'Administrator' %}
+                            <a href="#" class="grid-btn-edit grid-btn" data-appid="{{ data.app_id }}"
+                                data-app_name="{{ data.app_name }}" data-status="{{ data.status }}"
+                                data-app_url="{{ data.app_url }}" data-owner="{{ data.app_owner }}"
+                                data-perm_read="{{ data.can_read }}" data-perm_write="{{ data.can_write }}"
+                                data-perm_update="{{ data.can_update }}" data-perm_delete="{{ data.can_delete }}"><i
+                                    class="bi bi-pencil-square"></i></a>
+                            {% else %}
+                            <i class="bi bi-pencil-square" style="color:rgb(228, 229, 230)" title="Not allowed"></i>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if role_type == 'Administrator' %}
+                            <a href="#" class="grid-btn-delete" data-bs-toggle="modal" data-bs-target="#confirmDelete"
+                                data-appname="{{ data.app_name }}" data-appid="{{ data.app_id }}"><i
+                                    class="bi bi-trash3-fill"></i></a>
+                            {% else %}
+                            <i class="bi bi-trash3-fill" style="color:rgb(228, 229, 230)" title="Not allowed"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
         <!-- Enroll App Modal -->
         <div class="modal fade" id="enrollapp" tabindex="-1" aria-labelledby="enrollappModal" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content rounded-0">
-                    <div class="modal-header bg-custom-light p-2 border-top-0">
+                    <div class="modal-header corporate-blue-bg text-white rounded-0 p-2 border-top-0">
                         <h1 class="modal-title fs-5 ps-1" id="enrollappModal">
                             <i class="bi bi-window-stack me-2"></i>
                             Enroll New Application
                         </h1>
-                        <button type="button" class="btn-close me-1" data-bs-dismiss="modal"
+                        <button type="button" class="btn-close white-close me-1" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body pt-3 ps-4 pe-4">
-                        <span>
-                            Application Name:
-                            <input type="text" class="form-control form-control-sm rounded-0 mt-1">
-                        </span>
-                        <span>
-                            Application Owner:
-                            <input type="text" class="form-control form-control-sm rounded-0 mt-1">
-                        </span>
+                        <div class="row">
+                            <div class="col-6 col-sm-6">
+                                <span>
+                                    Application Name:
+                                    <input type="text" id="txt_application_name"
+                                        class="form-control form-control-sm rounded-0 mt-1" required>
+                                </span>
+                                <span>
+                                    Application Link / URL:
+                                    <input type="text" id="txt_application_link"
+                                        class="form-control form-control-sm rounded-0 mt-1" required>
+                                </span>
+                            </div>
+                            <div class="col-sm">
+                                <div class="rows">
+                                    <div class="col">
+                                        Status:
+                                        <select id="select_status" class="form-select form-select-sm rounded-0 mt-1"
+                                            required>
+                                            <option value=""></option>
+                                            <option value="True">Active</option>
+                                            <option value="False">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        Owner:
+                                        <input type="text" id="txt_owner"
+                                            class="form-control form-control-sm rounded-0 mt-1" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <strong>Application Permissions</strong>
+                                <br>
+                                <span>
+                                    <input type="checkbox" id="check_read" class="form-check-input">
+                                    Read
+                                    <br>
+                                    <input type="checkbox" id="check_write" class="form-check-input">
+                                    Write
+                                    <br>
+                                    <input type="checkbox" class="form-check-input" id="check_update">
+                                    Update
+                                    <br>
+                                    <input type="checkbox" class="form-check-input" id="check_delete">
+                                    Delete
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body ps-4 pe-4">
+                    <div class="modal-body ps-4 pe-4 pt-1">
                         <div class="row mb-2">
                             <div class="col-sm">
                                 <span>
                                     <h5>Available Dimensions</h5>
-                                    <select id="moduleList" multiple size="5"
+                                    <select id="select_available_dimensions" multiple size="5"
                                         class="form-select form-select-sm rounded-0">
                                         <!-- <option value="Status">Status</option> -->
-                                        <option value="Permissions">User Permissions</option>
+                                        <!-- <option value="Permissions">User Permissions</option> -->
                                         <!-- <option value="Owner">Owner</option> -->
                                         <option value="Company">Company</option>
                                         <option value="Brand">Brand</option>
                                         <option value="Location">Location</option>
-                                        <option value="Location">User Effectivity Date</option>
-                                        <option value="Location">User Expiration Date</option>
+                                        <!-- <option value="Location">User Effectivity Date</option>
+                                        <option value="Location">User Expiration Date</option> -->
                                         <option value="Location">Mall Group</option>
                                     </select>
                                 </span>
                             </div>
                             <div class="col-sm col-md-2 d-flex flex-column justify-content-center align-items-center"
                                 style="max-width: 70px;">
-                                <button onclick="addModule()" class="btn btn-sm btn-pro-white mt-3 mb-2">→</button>
-                                <button onclick="removeModule()" class="btn btn-sm btn-pro-white">←</button>
+                                <button onclick="addDimension()"
+                                    class="btn btn-sm btn-pro-white mt-3 mb-2 rounded-0">→</button>
+                                <button onclick="removeDimension()"
+                                    class="btn btn-sm btn-pro-white rounded-0">←</button>
                             </div>
                             <div class="col-sm">
                                 <h5>Selected Dimensions</h5>
-                                <select id="selectedModules" multiple size="5"
+                                <select id="select_selected_dimensions" multiple size="5"
                                     class="form-select form-select-sm rounded-0"></select>
-
                             </div>
                         </div>
                     </div>
+                    <div class="modal-body ps-4 pe-4 pt-1">
+                        <div class="row">
+                            <div class="col-5 pe-0">
+                                Module Name:
+                                <input type="text" id="txt_module_name"
+                                    class="form-control form-control-sm rounded-0 mt-1" required>
+                            </div>
+                            <div class="col-6">
+                                Link / URL:
+                                <input type="text" id="txt_link_url" class="form-control form-control-sm rounded-0 mt-1"
+                                    required>
+                            </div>
+                            <div class="col ps-0">
+                                <input type="button" class="btn btn-sm btn-pro-white mt-4 w-100 rounded-0" value="Add"
+                                    onclick="addModule()">
+                            </div>
+                        </div>
+                        <div class="bg-light-subtle rounded-0 mt-1 ps-2 pe-2 pt-1 pb-1">
+                            <table id="table_modules" class="table table-sm table-bordered mt-1 table-hover"></table>
+                        </div>
+                    </div>
                     <div class="modal-footer p-1 bg-custom-light rounded-0 border-bottom-0">
-                        <button type="button" class="btn btn-sm btn-pro-white">Save changes</button>
-                        <button type="button" class="btn btn-sm btn-pro-white" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-pro-white rounded-0" onclick="submitForm()">Save
+                            changes</button>
+                        <button type="button" class="btn btn-sm btn-pro-white rounded-0"
+                            data-bs-dismiss="modal">Close</button>
                     </div>
 
                 </div>
@@ -111,12 +309,85 @@
         </div>
         <!-- End Modal History -->
 
+        <!-- Button trigger modal -->
+        <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmDelete">
+            Launch demo modal
+        </button> -->
+
+        <!-- Modal -->
+        <div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDeleteLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h1 class="modal-title fs-5 text-danger ms-2" id="exampleModalLabel">Confirm Delete</h1>
+                        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="hidden_app_id">
+                        Are you sure you want to delete <strong><label id="lbl_application_name"></label></strong> in
+                        the master?
+                    </div>
+                    <div class="modal-footer p-1">
+                        <button type="button" id="btn_confirm_delete" class="btn btn-sm btn-pro-white">Yes</button>
+                        <button type="button" class="btn btn-sm btn-pro-white" data-bs-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="modal fade" id="confirmDeleteNotif" tabindex="-1" aria-labelledby="confirmDeleteNotifLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content rounded-0">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br>
+                        <label class="text-=text-center">Deleting application. Please Wait...</label>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <div class="modal fade" id="savingNotif" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="savingNotifLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2">Saving Application</h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="confirmDeleteNotif" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="confirmDeleteNotifLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2">Deleting Application</h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
     </div>
     <script>
-        function addModule() {
-            const moduleList = document.getElementById("moduleList");
-            const selectedModules = document.getElementById("selectedModules");
+        function addDimension() {
+            const moduleList = document.getElementById("select_available_dimensions");
+            const selectedModules = document.getElementById("select_selected_dimensions");
 
             for (let i = moduleList.options.length - 1; i >= 0; i--) {
                 const option = moduleList.options[i];
@@ -130,9 +401,9 @@
             }
         }
 
-        function removeModule() {
-            const moduleList = document.getElementById("moduleList");
-            const selectedModules = document.getElementById("selectedModules");
+        function removeDimension() {
+            const moduleList = document.getElementById("select_available_dimensions");
+            const selectedModules = document.getElementById("select_selected_dimensions");
 
             for (let i = selectedModules.options.length - 1; i >= 0; i--) {
                 const option = selectedModules.options[i];
@@ -146,6 +417,258 @@
             }
         }
     </script>
+
+    <script>
+        function addModule() {
+            const module_name = document.getElementById("txt_module_name").value;
+            const link_url = document.getElementById("txt_link_url").value;
+
+            if (module_name && link_url) {
+                const table = document.getElementById("table_modules");
+                const newRow = table.insertRow(-1);
+                newRow.innerHTML = `
+                    <td class="col-6 align-middle p-1">${module_name}</td>
+                    <td class="col-6 align-middle p-1 link-underline link-primary">${link_url}</td>
+                    <td class="col-1 align-middle p-1">
+                        <button class="btn btn-sm p-1" onclick="this.parentElement.parentElement.remove()" title="Remove Module">
+                            <i class="bi bi-trash text-dark"></i>
+                        </button>
+                `;
+                document.getElementById("txt_module_name").value = "";
+                document.getElementById("txt_link_url").value = "";
+            }
+        }
+    </script>
+    <script>
+        function submitForm() {
+            // Collect input values
+            const applicationName = document.getElementById("txt_application_name").value.trim();
+            const applicationLink = document.getElementById("txt_application_link").value.trim();
+            const status = document.getElementById("select_status").value.trim();
+            const owner = document.getElementById("txt_owner").value.trim();
+            const permissions = {
+                read: document.getElementById("check_read").checked,
+                write: document.getElementById("check_write").checked,
+                update: document.getElementById("check_update").checked,
+                delete: document.getElementById("check_delete").checked,
+            };
+            const selectedDimensions = Array.from(document.getElementById("select_selected_dimensions").options)
+                .map(option => option.value);
+
+            const modules = getModulesFromTable();
+
+            // ✅ Validation
+            const errors = [];
+            if (!applicationName) errors.push("Application Name is required.");
+            if (!applicationLink) errors.push("Application Link is required.");
+            if (!status) errors.push("Status must be selected.");
+            if (!owner) errors.push("Owner is required.");
+
+            const hasPermission = Object.values(permissions).some(p => p);
+            if (!hasPermission) errors.push("At least one permission must be selected.");
+
+            if (modules.length === 0) errors.push("At least one module must be added.");
+
+            if (errors.length > 0) {
+                alert("Please fix the following:\n\n" + errors.join("\n"));
+                return;
+            }
+
+            // ✅ Confirm before submitting
+            if (!confirm("Are you sure you want to save this application?")) {
+                return;
+            }
+
+            var notif_modal = new bootstrap.Modal(document.getElementById('savingNotif'));
+            notif_modal.show();
+
+            // ✅ All good, prepare the payload
+            const data = {
+                application_name: applicationName,
+                application_link: applicationLink,
+                status: status,
+                owner: owner,
+                permissions: permissions,
+                selected_dimensions: selectedDimensions,
+                modules: modules
+            };
+
+            // ✅ Send to Flask backend
+            fetch('/submit-app-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    notif_modal.hide();
+                    alert("Application saved successfully!");
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Something went wrong while saving.");
+                });
+        }
+
+        // ✅ Helper: Get modules from table
+        function getModulesFromTable() {
+            const table = document.getElementById("table_modules");
+            const modules = [];
+
+            // Ensure we skip the header
+            const rows = table.getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName("td");
+                if (cells.length >= 2) {
+                    const module_name = cells[0].textContent.trim();
+                    const link_url = cells[1].textContent.trim();
+                    if (module_name && link_url) {
+                        modules.push({ module_name, link_url });
+                    }
+                }
+            }
+
+            return modules;
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const delete_btn = document.querySelectorAll('.grid-btn-delete');
+
+            delete_btn.forEach(link => {
+                link.addEventListener('click', function () {
+                    document.getElementById('hidden_app_id').value = this.dataset.appid || '';
+                    document.getElementById('lbl_application_name').textContent = this.dataset.appname || '';
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('btn_confirm_delete').addEventListener('click', async function () {
+            const confirmDeleteElement = document.getElementById('confirmDelete');
+            const confirm_delete_modal = bootstrap.Modal.getInstance(confirmDeleteElement);
+            if (confirm_delete_modal) {
+                confirm_delete_modal.hide();
+            }
+
+            var notif_modal = new bootstrap.Modal(document.getElementById('confirmDeleteNotif'));
+            notif_modal.show();
+
+            const data = {
+                app_id: document.getElementById('hidden_app_id').value || null
+            };
+
+            try {
+                const response = await fetch('/delete_app', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    console.log("Deleted successfully:", result);
+                    window.location.reload();
+                } else {
+                    console.error("Delete failed:", result.message);
+                    alert("Failed to delete app.");
+                }
+            } catch (error) {
+                console.error("Error occurred:", error);
+                alert("An error occurred.");
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const edit_btn = document.querySelectorAll('.grid-btn-edit');
+
+            edit_btn.forEach(link => {
+                link.addEventListener('click', async function () {
+                    const data = {
+                        app_id: this.dataset.appid || null,
+                        app_name: this.dataset.app_name || null,
+                        status: this.dataset.status || null,
+                        app_owner: this.dataset.owner || null,
+                        app_url: this.dataset.app_url || '',
+                        perm_read: this.dataset.perm_read,
+                        perm_write: this.dataset.perm_write,
+                        perm_update: this.dataset.perm_update,
+                        perm_delete: this.dataset.perm_delete
+                    };
+
+                    try {
+                        const response = await fetch('/modify_app', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.redirect) {
+                            window.location.href = result.redirect;
+                        } else {
+                            alert("Failed to proceed to modification form.");
+                        }
+
+                    } catch (error) {
+                        console.error("Error occurred:", error);
+                        alert("An error occurred.", error);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modules_link = document.querySelectorAll('.modules-link');
+
+            modules_link.forEach(link => {
+                link.addEventListener('click', async function () {
+                    const data = {
+                        app_id: this.dataset.app_id || null
+                    };
+
+                    try {
+                        const response = await fetch('/app_modules', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.redirect) {
+                            window.location.href = result.redirect;
+                        } else {
+                            alert("Failed to proceed to modules form.");
+                        }
+
+                    } catch (error) {
+                        console.error("Error occurred:", error);
+                        alert("An error occurred.", error);
+                    }
+                });
+            });
+        });
+    </script>
+
+
 </body>
 
 </html>

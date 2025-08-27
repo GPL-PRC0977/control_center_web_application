@@ -44,3 +44,9 @@
 [data-bs-theme="dark"] .dark-mode-hidden {
     display: none !important;
 }
+.corporate-blue-bg{
+    background: linear-gradient(180deg, #0b4486, #2A2A86) !important;
+}
+.btn-close.white-close {
+  filter: invert(1) grayscale(100%) brightness(200%) !important;
+}

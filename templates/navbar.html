@@ -18,7 +18,7 @@
             /*background-color: rgb(37, 46, 53);
             /*background-color: rgb(0, 140, 186, 1);*/
             /* background-color: #03315b;*/
-            background: linear-gradient(180deg, #0b3a86, #03315b);
+            background: linear-gradient(180deg, #0b4486, #2A2A86);
         }
 
         .nav-link {
@@ -52,7 +52,7 @@
                         </div>
                     </li> -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="/">
                             <i class="bi bi-house"></i>
                             Home</a>
                     </li>
@@ -63,8 +63,11 @@
                                 Quick Actions
                             </button>
                             <ul class="dropdown-menu rounded-0" style="font-size: 13px;">
-                                <li><a class="dropdown-item" href="#">Enroll New Application</a></li>
-                                <li><a class="dropdown-item" href="#">Enroll New User</a></li>
+                                {% if role_type == 'Administrator' %}
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#enrollapp">Enroll New Application</a></li>
+                                {% endif %}
+                                <!-- <li><a class="dropdown-item" href="#">Enroll New User</a></li> -->
                                 <li><a class="dropdown-item" href="#">Reports</a></li>
                                 <li><a class="dropdown-item" href="#">Dashboard</a></li>
                             </ul>
@@ -90,7 +93,7 @@
     </nav>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-        <div class="offcanvas-header p-2 text-dark" style="background-color: #f5f5f5;border-bottom:1px solid #eeeeee;">
+        <div class="offcanvas-header p-2 bg-light-subtle" style="border-bottom:1px solid #eeeeee;">
             <!-- <i class="bi bi-person-circle ms-2" style="font-size: 60px;color: rgb(114, 113, 113);"></i> -->
             <!-- <svg version="1.1" fill="#515151" id="Layer_1" x="0px" y="0px" width="60px" height="60px"
                 viewBox="0 0 143.9 142.9" style="enable-background:new 0 0 143.9 142.9;" focusable="false"
@@ -128,9 +131,9 @@
                 style="width: 60px; height: 60px;"> -->
 
             <span class="ms-2">
-                <span style="font-size: 20px;">gilbert.laman</span>
+                <span style="font-size: 20px;" class="text-dark-subtle">{{ full_name }}</span>
                 <br>
-                <span class="text-dark"><i class="bi bi-envelope me-2"></i>gilbert.laman@primergrp.com</span>
+                <span class="text-dark-subtle"><i class="bi bi-envelope me-2"></i>{{ user.get('email', '') }}</span>
             </span>
 
             <button type="button" class="btn-close me-2 text-dark" data-bs-dismiss="offcanvas"
@@ -144,10 +147,17 @@
                 <div class="ms-2">
                     <!-- <p class="mb-1 text-muted"><i class="bi bi-envelope me-2"></i><strong>Email:</strong>
                         gilbert.laman@example.com</p> -->
-                    <p class="mb-1 text-muted"><i class="bi bi-person-badge me-2"></i><strong>Role:</strong> User
+                    <p class="mb-1 text-muted"><i class="bi bi-person-badge me-2"></i><strong>Role:</strong> {{
+                        role_type }}
                     </p>
                     <p class="mb-1 text-muted"><i class="bi bi-check-circle me-2"></i><strong>Status:</strong>
-                        <span class="text-success">Active</span>
+                        <span class="text-success">
+                            {% if status == 'True' %}
+                            Active
+                            {% else %}
+                            Inactive
+                            {% endif %}
+                        </span>
                     </p>
                     <p class="mb-1 text-muted"><i class="bi bi-clock me-2"></i><strong>Last Login:</strong>
                         2023-10-01
@@ -164,8 +174,8 @@
                         preferences
                         here.</p>
 
-                    <div class="dropdown mb-3">
-                        <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button"
+                    <div class="dropdown mb-3 floa">
+                        <button class="btn btn-outline-secondary dropdown-toggle btn-sm absol" type="button"
                             id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-palette me-1"></i> Theme
                         </button>
@@ -242,5 +252,6 @@
         document.documentElement.setAttribute('data-bs-theme', savedTheme);
     }
 </script>
+
 
 </html>

@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify, render_template, url_for, session, re
 from authlib.integrations.flask_client import OAuth
 import os
 from dotenv import load_dotenv
-from functions import validate_user
+from functions import validate_user, save_application_data, get_master_data, delete_application
+import sys
+import traceback
 
 load_dotenv()
 
@@ -25,13 +27,25 @@ google = oauth.register(
 
 @app.route('/')
 def home():
-    if session.get('user'):
-        user = session['user']
-        validate_user(user)
-        picture = session.get('picture')
-        return render_template('home.html')
-
-    return render_template('index.html')
+    try:
+        if 'user' in session and session['user']:
+            if validate_user(session['user']):
+                user_details = get_user_details()
+                return render_template(
+                    'home.html',
+                    picture=user_details['picture'],
+                    user=user_details['user'],
+                    full_name=user_details['full_name'],
+                    role_type=user_details['role_type'],
+                    status='True',
+                    master_data=get_master_data())
+            else:
+                return render_template('noaccess.html', error="User validation failed.")
+        else:
+            return render_template('index.html')
+    except Exception as e:
+        print(f"Error in home route: {e}")
+        return render_template('noaccess.html', error=str(e))
 
 
 @app.route('/login')
@@ -46,6 +60,7 @@ def callback():
     user_info = google.get(
         'https://openidconnect.googleapis.com/v1/userinfo').json()
     session['user'] = user_info
+    print(user_info)
     return redirect('/')
 
 
@@ -55,5 +70,207 @@ def logout():
     return redirect('/')
 
 
+@app.route('/modify_app', methods=['POST'])
+def modify_app():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No JSON data received"}), 400
+
+        required_keys = ['app_id', 'app_name',
+                         'app_url', 'status', 'app_owner']
+        missing_keys = [key for key in required_keys if key not in data]
+
+        if missing_keys:
+            return jsonify({"error": f"Missing required fields: {', '.join(missing_keys)}"}), 400
+
+        if not isinstance(data.get('app_id'), str) or not data.get('app_id').strip():
+            return jsonify({"error": "Invalid app ID"}), 400
+
+        session['app_id_to_modify'] = data['app_id']
+        session['app_name'] = data['app_name']
+        session['app_url'] = data['app_url']
+        session['app_status'] = data['status']
+        session['owner'] = data['app_owner']
+        session['perm_read'] = data['perm_read']
+        session['perm_write'] = data['perm_write']
+        session['perm_update'] = data['perm_update']
+        session['perm_delete'] = data['perm_delete']
+
+        print(f"App modification data stored in session for: {data['app_id']}")
+
+        return jsonify({"redirect": url_for('modify_app_form')}), 200
+
+    except Exception as e:
+        print(f"Exception in modify_app: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route('/modify_app_form', methods=['GET'])
+def modify_app_form():
+    try:
+        user_details = get_user_details()
+
+        app_id = session.get('app_id_to_modify')
+        app_name = session.get('app_name', 'Unnamed App')
+        app_url = session.get('app_url', '')
+        app_status = session.get('app_status', 'Unknown')
+        app_owner = session.get('owner', 'Not Assigned')
+        perm_read = session.get('perm_read')
+        perm_write = session.get('perm_write')
+        perm_update = session.get('perm_update')
+        perm_delete = session.get('perm_delete')
+
+        if not app_id:
+            print(
+                "Warning: No app ID found in session. Redirecting or showing error may be appropriate.")
+
+        return render_template(
+            'modify_app.html',
+            user=user_details.get("user", {}),
+            app_id=app_id,
+            app_name=app_name,
+            app_url=app_url,
+            app_status=app_status,
+            app_owner=app_owner,
+            full_name=user_details.get("full_name", "Unknown User"),
+            role_type=user_details.get("role_type", "guest"),
+            picture=user_details.get("picture", "/static/default-avatar.png"),
+            perm_read=perm_read,
+            perm_write=perm_write,
+            perm_update=perm_update,
+            perm_delete=perm_delete
+        )
+
+    except Exception as e:
+        print(f"Error rendering modify_app_form: {e}")
+        return render_template('noaccess.html', error="Something went wrong loading the form.")
+
+
+def get_user_details():
+    try:
+        admin_details = session.get('admin_details')
+        user = session.get('user')
+
+        if not isinstance(user, dict):
+            print("Invalid or missing 'user' in session.")
+            user = {}
+
+        if not isinstance(admin_details, dict):
+            print("Invalid or missing 'admin_details' in session.")
+            admin_details = {}
+
+        return {
+            "user": user,
+            "full_name": user.get('name', 'Unknown User'),
+            "picture": user.get('picture', '/static/default-avatar.png'),
+            "role_type": admin_details.get("role_type", 'guest')
+        }
+
+    except Exception as e:
+        print(f"Exception in get_user_details: {e}")
+        return {
+            "user": {},
+            "full_name": "Unknown User",
+            "picture": "",
+            "role_type": "guest"
+        }
+
+
+@app.route('/submit-app-data', methods=['POST'])
+def submit_app_data():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        user_email = session.get('user')
+
+        save_application_data(
+            application_name=data.get('application_name'),
+            app_url=data.get('application_link'),
+            status=data.get('status'),
+            owner=data.get('owner'),
+            permissions=data.get('permissions'),
+            dimensions=data.get('selected_dimensions'),
+            modules=data.get('modules'),
+            created_by=user_email
+        )
+
+        return jsonify({"message": "Success"}), 200
+
+    except Exception as e:
+        print(f"Error in submit_app_data: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/delete_app', methods=['POST'])
+def delete_app():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No parameter provided"}), 400
+
+        app_id = data.get('app_id')
+        print(f"Selected App ID: {app_id}")
+
+        result = delete_application(app_id)
+
+        if not result or result.get("status") != "success":
+            return jsonify({"error": "Failed to delete application"}), 500
+
+        return jsonify({"message": "Deletion Success"}), 200
+
+    except Exception as e:
+        print(f"Error in application deletion: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/app_modules', methods=['POST'])
+def app_modules():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No JSON data received"}), 400
+
+        if not isinstance(data.get('app_id'), str) or not data.get('app_id').strip():
+            return jsonify({"error": "Invalid app ID"}), 400
+
+        session['app_owner_id'] = data['app_id']
+
+        print(f"App modification data stored in session for: {data['app_id']}")
+
+        # return jsonify({"redirect": url_for('modules')}), 200
+        # return render_template('modules.html', app_id=data['app_id'])
+        return jsonify({"redirect": url_for('get_modules_form')}), 200
+
+    except Exception as e:
+        print(f"Exception in modify_app: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route('/get_modules_form', methods=['GET'])
+def get_modules_form():
+    try:
+        app_id = session.get('app_owner_id')
+
+        if not app_id:
+            print(
+                "Warning: No app ID found in session. Redirecting or showing error may be appropriate.")
+
+        return render_template(
+            'modules.html',
+            app_id=app_id,
+        )
+
+    except Exception as e:
+        print(f"Error rendering modify_app_form: {e}")
+        return render_template('noaccess.html', error="Something went wrong loading the form.")
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

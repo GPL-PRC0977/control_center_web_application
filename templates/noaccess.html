@@ -31,9 +31,9 @@
 
         /* Specific styling for the SVG icon container */
         .icon-lg-svg {
-            width: 100px;
+            width: 130px;
             /* Adjusted width for the robot icon */
-            height: 100px;
+            height: 130px;
             /* Adjusted height for the robot icon */
             display: inline-block;
             /* Ensure it respects text-align center */
@@ -73,31 +73,27 @@
         <div class="content-wrapper">
             <!-- Broken Robot Icon (SVG) - Google 404 inspired -->
             <div class="mb-4">
-                <svg class="icon-lg-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Head -->
+                <!-- <svg class="icon-lg-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C9.23858 2 7 4.23858 7 7V9H17V7C17 4.23858 14.7614 2 12 2Z" fill="#60A5FA" />
-                    <!-- Body -->
                     <path d="M5 9H19V18C19 19.1046 18.1046 20 17 20H7C5.89543 20 5 19.1046 5 18V9Z" fill="#3B82F6" />
-                    <!-- Arms (broken) -->
                     <path d="M3 11H5V13H3V11Z" fill="#6B7280" />
                     <path d="M19 11H21V13H19V11Z" fill="#6B7280" />
-                    <!-- Legs (stubs) -->
                     <path d="M9 20H7V22H9V20Z" fill="#6B7280" />
                     <path d="M17 20H15V22H17V20Z" fill="#6B7280" />
-                    <!-- Eyes -->
                     <circle cx="9.5" cy="6" r="1.5" fill="white" />
                     <circle cx="14.5" cy="6" r="1.5" fill="white" />
-                    <!-- Broken antenna -->
                     <path d="M12 2L10.5 0.5L10 1L11.5 2.5V3H12V2Z" fill="#EF4444" />
-                    <!-- Broken line on body -->
                     <path d="M11 13H13V15H11V13Z" fill="#DC2626" />
-                </svg>
+                </svg> -->
+
+                <img src="{{ url_for('static', filename='login_logo.png') }}" alt="Company Logo"
+                    class="mb-6 rounded-full shadow-lg icon-lg-svg" style="border-radius: 50%;">
             </div>
 
             <!-- Main Heading -->
-            <h1 class="display-4 fw-bold text-dark mb-3">
+            <h2 class="display-5 fw-bold text-dark mb-3">
                 Access Denied
-            </h1>
+            </h2>
 
             <!-- Sub-heading/explanation -->
             <p class="lead text-muted mb-4">
@@ -112,7 +108,7 @@
             </p>
 
             <!-- Contact Email Link -->
-            <a href="mailto:admin@example.com" class="btn btn-primary btn-lg shadow rounded-pill">
+            <a href="mailto:admin@example.com" class="btn btn-primary shadow rounded-pill">
                 Contact Administrator
             </a>
 

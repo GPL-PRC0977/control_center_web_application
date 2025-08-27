@@ -25,7 +25,7 @@
 
         /* Custom styles for the logo section background */
         .logo-section {
-            background: linear-gradient(135deg, #80b0ff, #03315b);
+            background: linear-gradient(135deg, #80b0ff, #2A2A86);
             /* Google blue to green gradient */
             display: flex;
             align-items: center;
@@ -110,9 +110,11 @@
         <div class="logo-section w-full md:w-1/2 p-8 md:p-12 rounded-t-xl md:rounded-l-xl md:rounded-tr-none">
             <img src="{{ url_for('static', filename='login_logo.png') }}" alt="Company Logo"
                 class="w-32 h-32 mb-6 rounded-full shadow-lg">
+
             <h1 class="text-white">Welcome Back!</h1>
             <p class="text-white" style="font-weight: bold;">Data Analytics & Development</p>
             <p class="text-white">Application Control Center</p>
+
         </div>
 
         <!-- Right Section: Login Form -->
