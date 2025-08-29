@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, url_for, session, re
 from authlib.integrations.flask_client import OAuth
 import os
 from dotenv import load_dotenv
-from functions import validate_user, save_application_data, get_master_data, delete_application
+from functions import validate_user, save_application_data, get_master_data, delete_application, get_modules, get_dimension
 import sys
 import traceback
 
@@ -140,7 +140,9 @@ def modify_app_form():
             perm_read=perm_read,
             perm_write=perm_write,
             perm_update=perm_update,
-            perm_delete=perm_delete
+            perm_delete=perm_delete,
+            dimensions=get_dimension(app_id),
+            modules=get_modules(app_id)
         )
 
     except Exception as e:
@@ -189,6 +191,7 @@ def submit_app_data():
         user_email = session.get('user')
 
         save_application_data(
+            function_mode=data.get('function_mode'),
             application_name=data.get('application_name'),
             app_url=data.get('application_link'),
             status=data.get('status'),
@@ -231,45 +234,62 @@ def delete_app():
 
 @app.route('/app_modules', methods=['POST'])
 def app_modules():
-    try:
-        data = request.get_json()
+    data = request.get_json()
+    app_id = data.get('app_id', '').strip() if data else ''
+    app_name = data.get('app_name', '').strip() if data else ''
 
-        if not data:
-            return jsonify({"error": "No JSON data received"}), 400
+    if not app_id:
+        return jsonify({"error": "Invalid or missing app_id"}), 400
 
-        if not isinstance(data.get('app_id'), str) or not data.get('app_id').strip():
-            return jsonify({"error": "Invalid app ID"}), 400
-
-        session['app_owner_id'] = data['app_id']
-
-        print(f"App modification data stored in session for: {data['app_id']}")
-
-        # return jsonify({"redirect": url_for('modules')}), 200
-        # return render_template('modules.html', app_id=data['app_id'])
-        return jsonify({"redirect": url_for('get_modules_form')}), 200
-
-    except Exception as e:
-        print(f"Exception in modify_app: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    session['app_owner_id'] = app_id
+    session['app_name'] = app_name
+    print(f"App ID stored in session: {app_id}")
+    return jsonify({"redirect": url_for('get_modules_form')}), 200
 
 
 @app.route('/get_modules_form', methods=['GET'])
 def get_modules_form():
-    try:
-        app_id = session.get('app_owner_id')
+    app_id = session.get('app_owner_id')
+    app_name = session.get('app_name')
+    if not app_id:
+        return render_template('noaccess.html', error="App ID not found in session.")
 
-        if not app_id:
-            print(
-                "Warning: No app ID found in session. Redirecting or showing error may be appropriate.")
+    modules = get_modules(app_id)
+    print(modules)
 
-        return render_template(
-            'modules.html',
-            app_id=app_id,
-        )
+    user_details = get_user_details()
 
-    except Exception as e:
-        print(f"Error rendering modify_app_form: {e}")
-        return render_template('noaccess.html', error="Something went wrong loading the form.")
+    return render_template('modules.html', app_id=app_id, app_name=app_name, modules=modules, error="Failed to load modules.", user=user_details)
+
+
+@app.route('/app_dimension', methods=['POST'])
+def app_dimension():
+    data = request.get_json()
+    app_id = data.get('app_id', '').strip() if data else ''
+    app_name = data.get('app_name', '').strip() if data else ''
+
+    if not app_id:
+        return jsonify({"error": "Invalid or missing app_id"}), 400
+
+    session['app_owner_id'] = app_id
+    session['app_name'] = app_name
+    print(f"App ID stored in session: {app_id}")
+    return jsonify({"redirect": url_for('get_dimension_form')}), 200
+
+
+@app.route('/get_dimension_form', methods=['GET'])
+def get_dimension_form():
+    app_id = session.get('app_owner_id')
+    app_name = session.get('app_name')
+    if not app_id:
+        return render_template('noaccess.html', error="App ID not found in session.")
+
+    dimension = get_dimension(app_id)
+    print(dimension)
+
+    user_details = get_user_details()
+
+    return render_template('dimensions.html', app_id=app_id, app_name=app_name, dimensions=dimension, error="Failed to load modules.", user=user_details)
 
 
 if __name__ == '__main__':

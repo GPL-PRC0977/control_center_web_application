@@ -23,7 +23,7 @@ def get_secret(project_id: str, secret_id: str) -> str:
 
 api_key = get_secret(project_id=secret_project_id, secret_id=secret_id)
 
-domain = "http://127.0.0.1:5001"
+domain = "http://127.0.0.1:5001/control_center"
 key = api_key
 
 
@@ -99,7 +99,7 @@ def validate_user(user):
             'Content-Type': 'application/json'
         }
 
-        url = f"{domain}/control_center/admin"
+        url = f"{domain}/admin"
         response = requests.post(url, headers=headers, data=payload)
 
         if response.status_code != 200:
@@ -137,7 +137,7 @@ def validate_user(user):
 
 def log_user_activity(user, action, details):
     try:
-        url = f"{domain}/control_center/log_activity"
+        url = f"{domain}/log_activity"
         payload = {
             "user": user,
             "action": action,
@@ -157,14 +157,18 @@ def log_user_activity(user, action, details):
         print(f"Exception during logging user activity: {e}")
 
 
-def save_application_data(application_name, app_url, status, owner, permissions, dimensions, modules, created_by):
+def save_application_data(function_mode, application_name, app_url, status, owner, permissions, dimensions, modules, created_by):
     try:
-        app_id = str(uuid.uuid4())
-        print(app_id)
+        if function_mode == "modify":
+            app_id = session.get('app_id_to_modify')
+        else:
+            app_id = str(uuid.uuid4())
+            print(app_id)
 
-        url = f"{domain}/control_center/save_application_data"
+        url = f"{domain}/save_application_data"
         payload = {
             "app_id": app_id,
+            "function_mode": function_mode,
             "application_name": application_name,
             "app_url": app_url,
             "status": status,
@@ -191,7 +195,7 @@ def save_application_data(application_name, app_url, status, owner, permissions,
 
 def get_master_data():
     try:
-        url = f"{domain}/control_center/get_app_master_data"
+        url = f"{domain}/get_app_master_data"
 
         headers = {
             'X-API-KEY': key,
@@ -222,7 +226,7 @@ def get_master_data():
 
 def delete_application(app_id):
     try:
-        url = f"{domain}/control_center/delete_app"
+        url = f"{domain}/delete_app"
 
         payload = {
             "app_id": app_id
@@ -248,7 +252,7 @@ def delete_application(app_id):
 
 def get_modules(app_id):
     try:
-        url = f"{domain}/control_center/get_modules"
+        url = f"{domain}/get_modules"
 
         payload = {
             "app_id": app_id
@@ -259,13 +263,38 @@ def get_modules(app_id):
         }
 
         response = requests.post(url, headers=headers, json=payload)
-
-        if response.status_code != 200:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("data", []) if isinstance(data, dict) else []
+        else:
             print(
-                f"Error deleting application: {response.status_code} - {response.text}")
-            return False
-
-        return response.json()
+                f"Module fetch failed: {response.status_code} - {response.text}")
+            return []
     except Exception as e:
-        print(f"Exception error: {e}")
-        return False
+        print(f"Module fetch error: {e}")
+        return []
+
+
+def get_dimension(app_id):
+    try:
+        url = f"{domain}/get_dimension"
+
+        payload = {
+            "app_id": app_id
+        }
+        headers = {
+            'X-API-KEY': key,
+            'Content-Type': 'application/json'
+        }
+        response = requests.post(
+            url, headers=headers, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("data", []) if isinstance(data, dict) else []
+        else:
+            print(
+                f"Dimension fetch failed: {response.status_code} - {response.text}")
+            return []
+    except Exception as e:
+        print(f"Dimension fetch error: {e}")
+        return []

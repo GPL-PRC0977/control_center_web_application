@@ -5,11 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Modification</title>
+    <style>
+        .custom-blue {
+            background: linear-gradient(180deg, #0b4486, #2A2A86) !important;
+        }
+    </style>
 </head>
 
 <body>
     {% include 'navbar.html' %}
-
 
     <div class="card rounded-0 m-3">
         <div class="card-header p-1 border-start-0 border-end-0 bg-light-subtle">
@@ -19,11 +23,13 @@
             <!-- <a href="/" class="btn btn-sm btn-pro-white float-end rounded-0">Cancel</a> -->
             <input type="button" class="btn btn-sm btn-pro-white float-end rounded-0" onclick="window.history.back()"
                 value="Cancel">
-            <input type="button" class="btn btn-sm btn-pro-white float-end me-1 rounded-0" value="Save">
+            <input type="button" class="btn btn-sm btn-pro-white float-end me-1 rounded-0" value="Save"
+                onclick="submitForm()">
 
         </div>
         <!-- <div class="card-header"></div> -->
         <div class="card-body">
+            <input type="hidden" id="function_mode" value="modify">
             <div class="row">
                 <div class="col-6 col-sm-6">
                     <span>
@@ -48,8 +54,8 @@
                             </select> -->
                             <select id="select_status" class="form-select form-select-sm rounded-0 mt-1" required>
                                 <option value="" {% if not app_status %}selected{% endif %}></option>
-                                <option value="Active" {% if app_status=='True' %}selected{% endif %}>Active</option>
-                                <option value="Inactive" {% if app_status=='False' %}selected{% endif %}>Inactive
+                                <option value="True" {% if app_status=='True' %}selected{% endif %}>Active</option>
+                                <option value="False" {% if app_status=='False' %}selected{% endif %}>Inactive
                                 </option>
                             </select>
 
@@ -79,21 +85,24 @@
                 </div>
             </div>
 
-            <div class="row mt-2 mb-2">
+
+
+
+        </div>
+        <div class="card-header custom-blue text-white p-1">
+            <strong> Dimensions</strong>
+        </div>
+        <div class="card-body">
+            <div class="row mb-2">
                 <div class="col-sm">
                     <span>
-                        <h5>Available Dimensions</h5>
+                        <strong>Available Dimensions</strong>
                         <select id="select_available_dimensions" multiple size="5"
                             class="form-select form-select-sm rounded-0">
-                            <!-- <option value="Status">Status</option> -->
-                            <!-- <option value="Permissions">User Permissions</option> -->
-                            <!-- <option value="Owner">Owner</option> -->
                             <option value="Company">Company</option>
                             <option value="Brand">Brand</option>
                             <option value="Location">Location</option>
-                            <!-- <option value="Location">User Effectivity Date</option>
-                                        <option value="Location">User Expiration Date</option> -->
-                            <option value="Location">Mall Group</option>
+                            <option value="Mall Group">Mall Group</option>
                         </select>
                     </span>
                 </div>
@@ -103,12 +112,24 @@
                     <button onclick="removeDimension()" class="btn btn-sm btn-pro-white rounded-0">←</button>
                 </div>
                 <div class="col-sm">
-                    <h5>Selected Dimensions</h5>
+                    <strong>Selected Dimensions</strong>
                     <select id="select_selected_dimensions" multiple size="5"
-                        class="form-select form-select-sm rounded-0"></select>
+                        class="form-select form-select-sm rounded-0">
+                        {% if dimension != '' %}
+                        {% for dimension in dimensions %}
+                        {% if dimension.dimension_name %}
+                        <option value="{{ dimension.dimension_name }}">{{ dimension.dimension_name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                    </select>
                 </div>
             </div>
-
+        </div>
+        <div class="card-header custom-blue text-white p-1">
+            <strong> Modules</strong>
+        </div>
+        <div class="card-body">
             <div class="row">
                 <div class="col-5 pe-0">
                     Module Name:
@@ -125,11 +146,217 @@
                 </div>
             </div>
             <div class="bg-light-subtle rounded-0 mt-1 ps-2 pe-2 pt-1 pb-1">
-                <table id="table_modules" class="table table-sm table-bordered mt-1 table-hover"></table>
+                <table id="table_modules" class="table table-sm table-bordered mt-1 table-hover">
+                    <thead>
+                        <th style="width: 600px;">Module Name</th>
+                        <th>Module Link</th>
+                        <th></th>
+                    </thead>
+                    {% if modules %}
+                    {% for module in modules %}
+                    <tr>
+                        <td>{{ module.module_name }}</td>
+                        <td class="text-primary">{{ module.url }}</td>
+                        <td class="text-center" style="width: 40px;">
+                            <a href="#" class="grid-btn-delete text-dark"><i class="bi bi-trash3-fill"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="savingNotif" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="savingNotifLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary mb-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <br />
+                    <h5 class="mb-2">Saving Application</h5>
+                    <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                </div>
             </div>
         </div>
     </div>
 
 </body>
+
+<script>
+    function syncAvailableDimensions() {
+        const availableSelect = document.getElementById('select_available_dimensions');
+        const selectedSelect = document.getElementById('select_selected_dimensions');
+
+        const selectedValues = Array.from(selectedSelect.options).map(opt => opt.value);
+
+        // Loop through available options and remove those already selected
+        Array.from(availableSelect.options).forEach(option => {
+            if (selectedValues.includes(option.value)) {
+                availableSelect.removeChild(option);
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        syncAvailableDimensions();
+    });
+</script>
+
+<script>
+    function addModule() {
+        const module_name = document.getElementById("txt_module_name").value;
+        const link_url = document.getElementById("txt_link_url").value;
+
+        if (module_name && link_url) {
+            const table = document.getElementById("table_modules");
+            const newRow = table.insertRow(-1);
+            newRow.innerHTML = `
+                    <td class="align-middle">${module_name}</td>
+                    <td class="align-middle link-underline link-primary">${link_url}</td>
+                    <td class="align-middle text-center">
+                        <a href="#" class="grid-btn-delete text-dark"><i class="bi bi-trash3-fill"></i></a>
+                `;
+            document.getElementById("txt_module_name").value = "";
+            document.getElementById("txt_link_url").value = "";
+        }
+    }
+</script>
+
+<script>
+    function addDimension() {
+        const moduleList = document.getElementById("select_available_dimensions");
+        const selectedModules = document.getElementById("select_selected_dimensions");
+
+        for (let i = moduleList.options.length - 1; i >= 0; i--) {
+            const option = moduleList.options[i];
+            if (option.selected) {
+                const newOption = document.createElement("option");
+                newOption.value = option.value;
+                newOption.text = option.text;
+                selectedModules.add(newOption);
+                moduleList.remove(i);  // Remove from available list
+            }
+        }
+    }
+
+    function removeDimension() {
+        const moduleList = document.getElementById("select_available_dimensions");
+        const selectedModules = document.getElementById("select_selected_dimensions");
+
+        for (let i = selectedModules.options.length - 1; i >= 0; i--) {
+            const option = selectedModules.options[i];
+            if (option.selected) {
+                const newOption = document.createElement("option");
+                newOption.value = option.value;
+                newOption.text = option.text;
+                moduleList.add(newOption);
+                selectedModules.remove(i);  // Remove from selected list
+            }
+        }
+    }
+</script>
+
+<script>
+    function submitForm() {
+        // Collect input values
+        const function_mode = document.getElementById('function_mode').value.trim();
+        const applicationName = document.getElementById("txt_application_name").value.trim();
+        const applicationLink = document.getElementById("txt_application_link").value.trim();
+        const status = document.getElementById("select_status").value.trim();
+        const owner = document.getElementById("txt_owner").value.trim();
+        const permissions = {
+            read: document.getElementById("check_read").checked,
+            write: document.getElementById("check_write").checked,
+            update: document.getElementById("check_update").checked,
+            delete: document.getElementById("check_delete").checked,
+        };
+        const selectedDimensions = Array.from(document.getElementById("select_selected_dimensions").options)
+            .map(option => option.value);
+
+        const modules = getModulesFromTable();
+
+        // ✅ Validation
+        const errors = [];
+        if (!applicationName) errors.push("Application Name is required.");
+        if (!applicationLink) errors.push("Application Link is required.");
+        if (!status) errors.push("Status must be selected.");
+        if (!owner) errors.push("Owner is required.");
+
+        const hasPermission = Object.values(permissions).some(p => p);
+        if (!hasPermission) errors.push("At least one permission must be selected.");
+
+        if (modules.length === 0) errors.push("At least one module must be added.");
+
+        if (errors.length > 0) {
+            alert("Please fix the following:\n\n" + errors.join("\n"));
+            return;
+        }
+
+        // ✅ Confirm before submitting
+        if (!confirm("Are you sure you want to save this application?")) {
+            return;
+        }
+
+        var notif_modal = new bootstrap.Modal(document.getElementById('savingNotif'));
+        notif_modal.show();
+
+        // ✅ All good, prepare the payload
+        const data = {
+            function_mode: function_mode,
+            application_name: applicationName,
+            application_link: applicationLink,
+            status: status,
+            owner: owner,
+            permissions: permissions,
+            selected_dimensions: selectedDimensions,
+            modules: modules
+        };
+
+        // ✅ Send to Flask backend
+        fetch('/submit-app-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+                notif_modal.hide();
+                alert("Application saved successfully!");
+                window.location.href = "/";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Something went wrong while saving.");
+            });
+    }
+
+    // ✅ Helper: Get modules from table
+    function getModulesFromTable() {
+        const table = document.getElementById("table_modules");
+        const modules = [];
+
+        // Ensure we skip the header
+        const rows = table.getElementsByTagName("tr");
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName("td");
+            if (cells.length >= 2) {
+                const module_name = cells[0].textContent.trim();
+                const link_url = cells[1].textContent.trim();
+                if (module_name && link_url) {
+                    modules.push({ module_name, link_url });
+                }
+            }
+        }
+
+        return modules;
+    }
+</script>
+
 
 </html>

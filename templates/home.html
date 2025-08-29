@@ -29,6 +29,10 @@
         .grid-btn-delete:hover {
             color: red;
         }
+
+        .custom-blue {
+            background: linear-gradient(180deg, #0b4486, #2A2A86);
+        }
     </style>
 </head>
 
@@ -46,35 +50,47 @@
             <a href="#" class="btn btn-sm rounded-0 p-0 ps-2 pe-2 m-0"><i class="bi bi-person-add me-2"></i>Enroll
                 New User</a>
         </div> -->
+
         <div class="card-body position-relative" style="height: calc(100vh - 53px);">
-            <!-- <img src="{{ picture }}" alt="User Picture" class="img-fluid rounded-circle"
-                style="width: 100px; height: 100px;"> -->
+
+
             <table class="table table-bordered table-hover table-sm custom-table-style">
-                <thead class="table-description">
-                    <th colspan="4" class="text-primary text-center bg-light-subtle p-0">Application Details</th>
-                    <th colspan="2" class="text-primary text-center bg-light-subtle p-0">Other Details</th>
-                    <th colspan="4" class="text-primary text-center bg-light-subtle p-0">Application Permission</th>
-                    <th colspan="2" class="text-primary text-center bg-light-subtle p-0">Creation Details</th>
-                    <th colspan="3" class="text-primary text-center bg-light-subtle p-0">Actions</th>
-                </thead>
                 <thead>
+                    <th colspan="16">
+                        <div class="position-relative">
+                            <input type="text" id="appSearch" onkeyup="filterApps()"
+                                placeholder="Search applications..." class="form-control form-control-sm pe-5 rounded-0"
+                                aria-label="Search applications" />
+                            <i class="bi bi-search position-absolute"
+                                style="top: 50%; right: 15px; transform: translateY(-50%); pointer-events: none; color: #888;"></i>
+                        </div>
+                    </th>
+                </thead>
+                <thead class="table-description">
+                    <th colspan="4" class="text-white text-center p-0 custom-blue p-0">Application Details
+                    </th>
+                    <th colspan="2" class="text-white text-center p-0 custom-blue p-0">Other Details</th>
+                    <th colspan="4" class="text-white text-center p-0 custom-blue p-0">Application Permission</th>
+                    <th colspan="2" class="text-white text-center p-0 custom-blue p-0">Creation Details</th>
+                    <th colspan="3" class="text-white text-center p-0 custom-blue p-0">Actions</th>
+                </thead>
+                <thead class="border-light">
                     <th class="d-none">Application ID</th>
-                    <th class="bg-light-subtle"></th>
-                    <th class="bg-light-subtle">Application Name</th>
-                    <th class="bg-light-subtle">Application Owner</th>
-                    <th class="bg-light-subtle text-center">Status</th>
-                    <th class="text-center bg-light-subtle">Dimensions</th>
-                    <th class="text-center bg-light-subtle">Modules</th>
-                    <th class="text-center bg-light-subtle">Read</th>
-                    <th class="text-center bg-light-subtle">Write</th>
-                    <th class="text-center bg-light-subtle">Update</th>
-                    <th class="text-center bg-light-subtle">Delete</th>
-                    <th class="bg-light-subtle">Created By</th>
-                    <th class="bg-light-subtle">Date Created</th>
-                    <!-- <th colspan="3" class="bg-light text-center">User / Edit / Delete</th> -->
-                    <th class="text-center bg-light-subtle" style="width: 50px;">User</th>
-                    <th class="text-center bg-light-subtle" style="width: 50px;">Edit</th>
-                    <th class="text-center bg-light-subtle" style="width: 50px;">Delete</th>
+                    <th class="bg-secondary-subtle"></th>
+                    <th class="bg-secondary-subtle">Application Name</th>
+                    <th class="bg-secondary-subtle">Application Owner</th>
+                    <th class="bg-secondary-subtle text-center">Status</th>
+                    <th class="text-center bg-secondary-subtle">Dimensions</th>
+                    <th class="text-center bg-secondary-subtle">Modules</th>
+                    <th class="text-center bg-secondary-subtle">Read</th>
+                    <th class="text-center bg-secondary-subtle">Write</th>
+                    <th class="text-center bg-secondary-subtle">Update</th>
+                    <th class="text-center bg-secondary-subtle">Delete</th>
+                    <th class="bg-secondary-subtle">Created By</th>
+                    <th class="bg-secondary-subtle">Date Created</th>
+                    <th class="text-center bg-secondary-subtle" style="width: 50px;">User</th>
+                    <th class="text-center bg-secondary-subtle" style="width: 50px;">Edit</th>
+                    <th class="text-center bg-secondary-subtle" style="width: 50px;">Delete</th>
                 </thead>
                 <tbody>
                     {% for data in master_data %}
@@ -94,17 +110,31 @@
                             {% endif %}
 
                         </td>
-                        <td class="text-center text-primary"><a href="">{{ data.dimension_count }}</a></td>
-                        <td class="text-center text-primary"><a href="#" class="modules-link"
-                                data-app_id="{{ data.app_id }}">{{
-                                data.module_count }}</a></td>
+                        <td class="text-center">
+                            {% if data.dimension_count == 0 %}
+                            {{ data.dimension_count }}
+                            {% else %}
+                            <a href="#" class="dimension-link text-primary" data-app_id="{{ data.app_id }}"
+                                data-app_name="{{ data.app_name }}">{{
+                                data.dimension_count }}</a>
+                            {% endif %}
+
+                        </td>
+                        <td class="text-center">
+                            {% if data.module_count == 0 %}
+                            data.module_count
+                            {% else %}
+                            <a href="#" class="modules-link text-primary" data-app_id="{{ data.app_id }}"
+                                data-app_name="{{ data.app_name }}">{{
+                                data.module_count }}</a>
+                            {% endif %}
+                        </td>
                         <td class="text-center">
                             {% if data.can_read %}
                             <i class="bi bi-check text-success"></i>
                             {% else %}
                             <i class="bi bi-x text-danger"></i>
                             {% endif %}
-                            <!-- {{ data.can_read }} -->
                         </td>
                         <td class="text-center">
                             {% if data.can_write %}
@@ -172,6 +202,7 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body pt-3 ps-4 pe-4">
+                        <input type="hidden" id="function_mode" value="save">
                         <div class="row">
                             <div class="col-6 col-sm-6">
                                 <span>
@@ -318,7 +349,7 @@
         <div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDeleteLabel"
             aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content rounded-0">
                     <div class="modal-header p-2">
                         <h1 class="modal-title fs-5 text-danger ms-2" id="exampleModalLabel">Confirm Delete</h1>
                         <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
@@ -329,8 +360,10 @@
                         the master?
                     </div>
                     <div class="modal-footer p-1">
-                        <button type="button" id="btn_confirm_delete" class="btn btn-sm btn-pro-white">Yes</button>
-                        <button type="button" class="btn btn-sm btn-pro-white" data-bs-dismiss="modal">No</button>
+                        <button type="button" id="btn_confirm_delete"
+                            class="btn btn-sm btn-pro-white rounded-0">Yes</button>
+                        <button type="button" class="btn btn-sm btn-pro-white rounded-0"
+                            data-bs-dismiss="modal">No</button>
                     </div>
                 </div>
             </div>
@@ -384,6 +417,26 @@
 
 
     </div>
+
+    <script>
+        function filterApps() {
+            const input = document.getElementById('appSearch');
+            const filter = input.value.toLowerCase();
+            const table = document.querySelector('.custom-table-style');
+            const trs = table.querySelectorAll('tbody tr');
+
+            trs.forEach(tr => {
+                // Get all visible td text content combined
+                // Exclude hidden columns if needed (like .d-none)
+                const tds = Array.from(tr.querySelectorAll('td:not(.d-none)'));
+                const rowText = tds.map(td => td.textContent.toLowerCase()).join(' ');
+
+                tr.style.display = rowText.includes(filter) ? '' : 'none';
+            });
+        }
+
+    </script>
+
     <script>
         function addDimension() {
             const moduleList = document.getElementById("select_available_dimensions");
@@ -442,6 +495,7 @@
     <script>
         function submitForm() {
             // Collect input values
+            const function_mode = document.getElementById('function_mode').value.trim();
             const applicationName = document.getElementById("txt_application_name").value.trim();
             const applicationLink = document.getElementById("txt_application_link").value.trim();
             const status = document.getElementById("select_status").value.trim();
@@ -484,6 +538,7 @@
 
             // ✅ All good, prepare the payload
             const data = {
+                function_mode: function_mode,
                 application_name: applicationName,
                 application_link: applicationLink,
                 status: status,
@@ -639,11 +694,49 @@
             modules_link.forEach(link => {
                 link.addEventListener('click', async function () {
                     const data = {
-                        app_id: this.dataset.app_id || null
+                        app_id: this.dataset.app_id || null,
+                        app_name: this.dataset.app_name || null
                     };
 
                     try {
                         const response = await fetch('/app_modules', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.redirect) {
+                            window.location.href = result.redirect;
+                        } else {
+                            alert("Failed to proceed to modules form.");
+                        }
+
+                    } catch (error) {
+                        console.error("Error occurred:", error);
+                        alert("An error occurred.", error);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modules_link = document.querySelectorAll('.dimension-link');
+
+            modules_link.forEach(link => {
+                link.addEventListener('click', async function () {
+                    const data = {
+                        app_id: this.dataset.app_id || null,
+                        app_name: this.dataset.app_name || null
+                    };
+
+                    try {
+                        const response = await fetch('/app_dimension', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
