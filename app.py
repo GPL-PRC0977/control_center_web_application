@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, url_for, session, re
 from authlib.integrations.flask_client import OAuth
 import os
 from dotenv import load_dotenv
-from functions import validate_user, save_application_data, get_master_data, delete_application, get_modules, get_dimension
+from functions import validate_user, save_application_data, get_master_data, delete_application, get_modules, get_dimension, search_hcm_id, insert_enroll_administrator_function, delete_administrator, retrieve_administrator_details_to_gridview, load_administrators, log_api_activity
 import sys
 import traceback
 
@@ -46,6 +46,15 @@ def home():
     except Exception as e:
         print(f"Error in home route: {e}")
         return render_template('noaccess.html', error=str(e))
+
+
+@app.route('/manage_users')
+def manage_users():
+    user_details = get_user_details()
+    return_processed = load_administrators()
+    return render_template('users.html', headers=return_processed['headers'], data=return_processed['rows'], user=user_details['user'], full_name=user_details['full_name'],
+                           role_type=user_details['role_type'],
+                           status='True')
 
 
 @app.route('/login')
@@ -290,6 +299,103 @@ def get_dimension_form():
     user_details = get_user_details()
 
     return render_template('dimensions.html', app_id=app_id, app_name=app_name, dimensions=dimension, error="Failed to load modules.", user=user_details)
+
+# Search function in modal
+
+
+# ------------------------------------------------------------------------------------------------------------------------
+# FRED
+
+@app.route('/search_hcm_id', methods=['POST'])
+def enroll_administrator():
+    # get_users()
+    print(f"enroll_administrator function was triggered, will now process data")
+    return_processed = search_hcm_id()
+
+    if return_processed['status'] == 'error':
+        return jsonify(return_processed)
+    else:
+        return jsonify(return_processed), 200
+
+
+# Search function in Gridview
+# AS IT IS HARDCODED
+
+
+@app.route('/retrieve_administrator_details', methods=['POST'])
+def retrieve_administrator_details():
+    try:
+
+        return_processed = retrieve_administrator_details_to_gridview()
+
+        print(
+            f"Data processed from API for retrieve_administrator_details :{retrieve_administrator_details_to_gridview}")
+
+        user_details = get_user_details()
+
+        return render_template('users.html', headers=return_processed['headers'], data=return_processed['rows'], message=return_processed['message'], status=True, status2=return_processed['status'], user=user_details['user'], full_name=user_details['full_name'],
+                               role_type=user_details['role_type'])
+
+    # Logic that search if user exist in administrator_master table
+
+    except Exception as e:
+        # full_traceback = traceback.format_exc()
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+
+        print(f"Error occurred in file: {file_name}")
+        print(f"Error occurred on line number: {line_number}")
+        print(f"Error message: {e}")
+        # print(f"Full Traceback: {full_traceback}")
+
+
+@app.route('/insert_enroll_administrator', methods=['POST'])
+def insert_enroll_administrator():
+
+    try:
+        print("The insert_enroll_administrator_function was triggered")
+        # Call the function here
+        return_processed = insert_enroll_administrator_function(
+            session.get('user'))
+
+        if return_processed['status'] == 'error':
+            return jsonify(return_processed), 409
+        else:
+            return jsonify(return_processed), 200
+    except Exception as e:
+        # full_traceback = traceback.format_exc()
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+
+        print(f"Error occurred in file: {file_name}")
+        print(f"Error occurred on line number: {line_number}")
+        print(f"Error message: {e}")
+
+
+# FUNCTION TO DELETE ADMINISTRATOR
+@app.route('/delete_administrator', methods=['POST'])
+def handle_delete_administrator():
+
+    try:
+        print(f"Delete Administrator Function was triggered and called ")
+
+        return_processed = delete_administrator(session.get('user'))
+
+        if return_processed['status'] == 'error':
+            return jsonify(return_processed), 409
+        else:
+            return jsonify(return_processed), 200
+    except Exception as e:
+        # full_traceback = traceback.format_exc()
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_name = exc_tb.tb_frame.f_code.co_filename
+        line_number = exc_tb.tb_lineno
+
+        print(f"Error occurred in file: {file_name}")
+        print(f"Error occurred on line number: {line_number}")
+        print(f"Error message: {e}")
 
 
 if __name__ == '__main__':

@@ -23,8 +23,10 @@
             <!-- <a href="/" class="btn btn-sm btn-pro-white float-end rounded-0">Cancel</a> -->
             <input type="button" class="btn btn-sm btn-pro-white float-end rounded-0" onclick="window.history.back()"
                 value="Cancel">
-            <input type="button" class="btn btn-sm btn-pro-white float-end me-1 rounded-0" value="Save"
-                onclick="submitForm()">
+            <a href="#" class="btn btn-sm btn-pro-white float-end me-1 rounded-0" onclick="submitForm()"><i
+                    class="bi bi-floppy2-fill"></i> Save</a>
+            <!-- <input type="button" class="btn btn-sm btn-pro-white float-end me-1 rounded-0" value="Save"
+                onclick="submitForm()"> -->
 
         </div>
         <!-- <div class="card-header"></div> -->
@@ -158,7 +160,9 @@
                         <td>{{ module.module_name }}</td>
                         <td class="text-primary">{{ module.url }}</td>
                         <td class="text-center" style="width: 40px;">
-                            <a href="#" class="grid-btn-delete text-dark"><i class="bi bi-trash3-fill"></i></a>
+                            <a href="#" class="grid-btn-delete text-dark"
+                                onclick="this.parentElement.parentElement.remove()"><i
+                                    class="bi bi-trash3-fill"></i></a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -218,7 +222,7 @@
                     <td class="align-middle">${module_name}</td>
                     <td class="align-middle link-underline link-primary">${link_url}</td>
                     <td class="align-middle text-center">
-                        <a href="#" class="grid-btn-delete text-dark"><i class="bi bi-trash3-fill"></i></a>
+                        <a href="#" class="grid-btn-delete text-dark" onclick="this.parentElement.parentElement.remove()"><i class="bi bi-trash3-fill"></i></a>
                 `;
             document.getElementById("txt_module_name").value = "";
             document.getElementById("txt_link_url").value = "";

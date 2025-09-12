@@ -50,3 +50,71 @@
 .btn-close.white-close {
   filter: invert(1) grayscale(100%) brightness(200%) !important;
 }
+
+/************* Custom CSS *************/
+/* CSS for button inside a textbox */
+.search-hcm-input-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-hcm-input-container input {
+  flex-grow: 1;
+}
+
+.search-hcm-button {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.bi-exclamation-triangle-fill {
+    color: #ff8c00;
+}
+
+
+/* CSS design for read-only textboxes */
+input[type="text"]:read-only {
+    background-color: #f0f0f0; /* A light grey color */
+    border: 1px solid #ccc; /* A subtle border */
+    color: #555; /* Dark grey text color */
+    cursor: default; /* Change the cursor to a default arrow */
+}
+
+
+
+
+
+
+
+/* Type 2 */
+.search-container {
+  position: relative; /* This is the key for positioning the button */
+  display: inline-block;
+  /* width: 365px; */
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 40px 10px 10px; /* Add right padding to make space for the button */
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.search-button {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}

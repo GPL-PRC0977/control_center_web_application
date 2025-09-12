@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator (Service Desk)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+
+<body>
+
+    {% include 'navbar.html' %}
+
+
+    <div class="card rounded-0">
+
+        <div class="card-header p-1">
+            <a href="#" id="open_enroll_modal" class="btn btn-sm rounded-0 p-0 ps-2 pe-2 m-0" data-bs-toggle="modal"
+                data-bs-target="#enrolluser">
+                <i class="bi bi-person-add me-2"></i>Enroll
+                New User</a>
+
+                <!-- <a href="/manage_users" class="btn btn-outline-secondary btn-sm float-end p-0 ps-2 pe-2">
+                    <i class="bi bi-arrow-repeat"></i> Reset
+                </a> -->
+        </div>
+        <div class="card-body position-relative" style="height: calc(100vh - 85px);">
+            <!-- <img src="{{ picture }}" alt="User Picture" class="img-fluid rounded-circle"
+                style="width: 100px; height: 100px;"> -->
+
+                {% if status2 %}
+                {% if not "No HCM ID found" in message %}
+                    <div class="alert alert-primary" role="alert">
+                       <i class="bi bi-info-circle-fill text-success"> </i>  {{ message }} <strong> <a href="/manage_users" class="">click here to reset.</a></strong>
+                       <a href="/manage_users" class="btn btn-sm float-end mt-0" style="margin-top: -5px !important;">
+                    <i class="bi bi-x-lg"></i>
+                    </a>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-primary" role="alert">
+                       <i class="bi bi-info-circle-fill text-danger"> </i>  {{ message }} <strong> <a href="/manage_users" class="">click here to reset.</a></strong>
+                       <a href="/manage_users" class="btn btn-sm float-end mt-0" style="margin-top: -5px !important;">
+                    <i class="bi bi-x-lg"></i>
+                    </a>
+                    </div>
+                {% endif %}
+                {% endif %}
+
+
+            <!-- Enroll Administrator Modal -->
+            <form id="retrieve_administrator_details_forms" action="/retrieve_administrator_details" method="post">
+                <div class="">
+                    <input id="txt_search_employee" name="txt_search_employee" type="text"
+                        class="form-control form-control-sm rounded-0 m-auto" placeholder="Search by HCM ID...">
+                    <button type="submit" class="border-0 bg-transparent"
+                        style="position: absolute; right: 0;margin-top: -26px;margin-right: 20px;"><i
+                            class="bi bi-search"></i></button>
+                </div>
+            </form>
+
+
+
+
+            <!-- Add gridview here using Jinja result from query -->
+            <table class="table table-sm table-bordered table-striped mt-1 table-hover">
+                <thead>
+                    <tr>
+                        {% for header in headers %}
+                            {% if header != 'id' and header !='Ticket Number' %}
+                            <th>{{ header }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        {% for header in headers %}
+                            {% if header != 'id' and header !='Ticket Number'  %}
+                            <td>{{ row[header] }}</td>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Delete button -->
+                        <td class="text-center">
+                            <a href="#" class="grid-btn-delete" data-bs-toggle="modal" data-bs-target="#confirmDelete"
+                                 data-userid="{{ row.id }}" data-username="{{ row['Full Name'] }}"><i
+                                    class="bi bi-trash3-fill"></i></a>
+                        </td>
+
+
+                        <!-- Edit button -->
+                        <td class="text-center">
+                            <a href="#" class="grid-btn-edit" 
+                                data-userid="{{ row.id }}"  
+                                data-hcm_id="{{ row['HCM ID'] }}" 
+                                data-full_name="{{ row['Full Name'] }}" 
+                                data-sbu="{{ row['SBU'] }}" 
+                                data-position="{{ row['Job Position'] }}" 
+                                data-access_start_date="{{ row['Access Start Date'] }}" 
+                                data-access_end_date="{{ row['Access End Date'] }}"  
+                                data-email="{{ row['Email Address'] }}"  
+                                data-ticket_number="{{ row['Ticket Number'] }}"  
+                                data-role="{{ row['Role Type'] }}"><i
+                                    class="bi bi-pencil-square"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- End of gridview -->
+
+        </div>
+    </div>
+
+
+
+        <!-- Modal for searching a employee to enroll from HCM spinner indicating process is being made -->
+        <div class="modal fade" id="searchEmployeeEnrollSpinner" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="searchEmployeeEnrollSpinnerLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2">Searching Employee in HCM <strong><label id="lbl_search_hcm_user"></label></strong></h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Modal for searching a administrator spinner indicating process is being made -->
+        <div class="modal fade" id="searchAdminSpinner" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="searchUserSpinnerLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2">Searching Administrator <strong><label id="lbl_search_hcm_user"></label></strong></h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- Modal for deleting a administrator spinner indicating process is being made -->
+        <div class="modal fade" id="confirmDeleteNotif" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="confirmDeleteNotifLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2">Deleting Administrator</h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Modal for Saving new administrator spinner indicating process is being made -->
+        <div class="modal fade" id="confirmSaveNotifLabel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="confirmSaveNotifLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2"><label id="lbl_confirm_spinner_insert"></label></h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Modal for Editing spinner indicating process is being made -->
+        <div class="modal fade" id="confirmEditNotifLabel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="confirmEditNotifLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <br />
+                        <h5 class="mb-2">Applying Changes</h5>
+                        <p class="text-muted mb-0">Please wait while we complete the process.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Modal to confirm Add new administrator -->
+        <div class="modal fade" id="confirmSave" tabindex="-1" aria-labelledby="confirmSaveLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h1 class="modal-title fs-5 text-danger ms-2" id="exampleModalLabel"><label id="lbl_confirm_edit_insert_header"></label> Administrator</h1>
+                        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want <label id="lbl_confirm_edit_insert"></label> <strong><label id="lbl_add_admin"></label></strong> in
+                        the Administrator Master?
+                    </div>
+                    <div class="modal-footer p-1">
+                        <button type="button" id="btn_enroll_user"  onclick="insert_enroll_administrator()" class="btn btn-sm btn-pro-white">Yes</button>
+                        <button type="button" class="btn btn-sm btn-pro-white" data-bs-target="#enrolluser" data-bs-toggle="modal"  data-bs-dismiss="modal">No</button>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Modal to confirm delete -->
+        <div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDeleteLabel"
+            aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h1 class="modal-title fs-5 text-danger ms-2" id="exampleModalLabel">Confirm Delete</h1>
+                        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                    </div>
+
+                    <!-- Alert -->
+                    <div class="alert alert-warning mb-0" role="alert">
+                       <!-- <i class="bi bi-info-circle-fill">This operation cannot be undone.</i>   -->
+                       <i class="bi bi-exclamation-triangle-fill"></i>      This operation cannot be undone.
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="hidden_user_id">
+                        <!-- Are you sure you want to delete <strong><label id="lbl_user_full_name"></label></strong> in
+                        the Administrator Master? -->
+
+                        <div class="row pt-2 pb-2">
+
+                           <span>Administrator <strong><label id="lbl_user_full_name"></label></strong> will be removed in
+                                Administrator Master permanently. </span>     
+                        </div>
+
+                        <div class="row pt-3 ps-2 pe-2">
+                                <span class="ps-0">To confirm deletion, please type the reason:</span>
+                                <input id="txt_deletion_reason" type="text" autocomplete="off" class="form-control form-control-sm rounded-0 mt-1">
+                        </div>
+                    </div>
+                    <div class="modal-footer p-1">
+                        <button type="button" id="btn_confirm_delete" class="btn btn-sm btn-pro-white" disabled>Yes</button>
+                        <button type="button" id="btn_close_delete" class="btn btn-sm btn-pro-white" data-bs-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    <!-- Modal for Enroll Users -->
+    <div class="modal fade" id="enrolluser" data-bs-backdrop="static" data-bs-keyboard="false"
+        aria-labelledby="enrolluserModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content rounded-0">
+                <div class="modal-header bg-custom-light p-2 border-top-0">
+                    <h1 class="modal-title fs-5 ps-1" id="enrolluser">
+                        <i class="bi bi-window-stack me-2"></i>
+
+
+                        <!-- Dito ko gagawing dynamic yung pag pop ng label -->
+                        <label id="lbl_modal_mode"></label> Administrator
+                    </h1>
+                    <!-- <button type="button" class="btn-close me-1" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                </div>
+                <div class="modal-body pt-3 ps-4 pe-4">
+
+                    <!-- <form id="enrollAdministrator" > -->
+
+
+                    <!-- <span>
+                            Search HCM Employee ID:
+                            <input type="text" class="form-control form-control-sm rounded-0 mt-1">
+                        </span>
+                        <button type="button" class="btn btn-sm btn-pro-white">Save changes</button> -->
+                    <div class="row">
+                        <div class="col">
+                            <div class="search-container">
+                                <div id="alert_No_Result"
+                                    style="display: none; padding: 15px; border: 1px solid #ffc107; background-color: #fff3cd; color: #856404;">
+                                    <p>❌ No employee found.</p>
+                                </div>
+                                <span id="span_search_hcm_id"></span>
+                                <input id="txt_search_hcm" type="text"
+                                    class="form-control form-control-sm rounded-0 mt-1">
+                                <button id="btn_search_hcm_id" onclick="search_hcm_id()" class="border-0 bg-transparent"
+                                    style="position: absolute; right: 0;margin-top: -26px;margin-right: 5px;"><i
+                                        class="bi bi-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="col">
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <span>
+                                Full Name:
+                                <input id="txt_full_name" type="text"
+                                    class="form-control form-control-sm rounded-0 mt-1" readonly>
+                            </span>
+                        </div>
+                        <div class="col">
+                            <span>
+                                Email:
+                                <input id="txt_email" type="text" class="form-control form-control-sm rounded-0"
+                                    readonly>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <span> SBU: </span>
+                            <input id="txt_sbu" type="text" class="form-control form-control-sm rounded-0" readonly>
+                        </div>
+                        <div class="col">
+                            <span> Ticket Number: </span>
+                            <input id="txt_ticket_number" pattern="[0-9]*" type="text"
+                                class="form-control form-control-sm rounded-0" required>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <span> Position: </span>
+                            <input id="txt_job_position" type="text" class="form-control form-control-sm rounded-0"
+                                readonly>
+                        </div>
+                        <div class="col">
+                            <span>
+                                Role:
+                                <select id="ddl_role" name="Role" class="form-select form-select-sm" required>
+                                    <option value=""></option>
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Super Administrator">Super Administrator</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <span> Access Start Date: </span>
+                            <input id="txt_access_date_start" type="date" class="form-control form-control-sm rounded-0"
+                                required>
+                        </div>
+                        <div class="col">
+                            <span> Access End Date: </span>
+                            <input id="txt_access_date_end" type="date" class="form-control form-control-sm rounded-0"
+                                required>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer p-1 bg-custom-light rounded-0 border-bottom-0">
+                    <button type="button" id="btn_enroll_user_modal"
+                        onclick="validateIfEnrollTextboxEmpty()"name="btn_enroll_user_modal" class="btn btn-sm btn-pro-white" disabled>Save changes</button>
+                    <button type="button" id="btn_close_enroll_modal"  class="btn btn-sm btn-pro-white" data-bs-dismiss="modal">Close</button>
+
+                    <!-- Value to determine if user was to enroll a user or edit existing administrator  -->
+                     <input type="hidden" name="action_mode" id="modal_mode">
+
+                </div>
+                <!-- </form> -->
+            </div>
+        </div>
+    </div>
+    <!-- End Enroll User Modal -->
+
+
+
+    <script>
+            function disableSaveChanges(value){
+
+                const modalInput = document.getElementById('txt_full_name');
+                const modalBtn = document.getElementById('btn_enroll_user_modal');
+                
+
+                    if (modalInput.value.trim().length > 0) {
+                        modalBtn.disabled = false;
+                        console.log("It works");
+                    } else {
+                        modalBtn.disabled = true;
+                        console.log("Not working");
+                    }
+        }
+    </script>
+
+
+
+
+    <script>
+        function validateIfEnrollTextboxEmpty(){
+            const openModalBtn = document.getElementById('btn_enroll_user_modal');
+
+            const confirmSaveElement = document.getElementById('confirmSave');
+            const confirm_save_modal = bootstrap.Modal.getInstance(confirmSaveElement);
+
+            const enrollModal = document.getElementById('enrolluser');
+            const enroll_user_modal = bootstrap.Modal.getInstance(enrollModal);
+
+            // Add a click listener to that button.
+            // const mode = document.getElementById('modal_mode').value; // 
+            // alert(`The user will perform ${mode}`);
+
+
+   
+                // openModalBtn.addEventListener('click', function(event) {
+                    const hcm_id = document.getElementById('txt_search_hcm').value;
+                    const full_name = document.getElementById('txt_full_name').value;
+                    const email = document.getElementById('txt_email').value;
+                    const role_type = document.getElementById('ddl_role').value;
+                    const sbu = document.getElementById('txt_sbu').value;
+                    const job_position = document.getElementById('txt_job_position').value;
+                    const ticket_number = document.getElementById('txt_ticket_number').value;
+                    const access_start_date = document.getElementById('txt_access_date_start').value;
+                    const access_end_date = document.getElementById('txt_access_date_end').value;
+                    // const hcm_id = document.getElementById('txt_search_hcm').value = ;
+
+                    const errors = [];
+
+                    if (!job_position) errors.push("Job Position is required.");
+                    if (!sbu) errors.push("SBU is required.");
+                    if (!email) errors.push("Email is required.");
+                    if (!hcm_id) errors.push("HCM ID is required.");
+                    if (!ticket_number) errors.push("Ticket Number is required.");
+                    if (!role_type) errors.push("Role Type is required.");
+                    if (!access_start_date) errors.push("Access Start Date is required.");
+                    if (!access_end_date) errors.push("Access End Date is required.");
+
+                    if (errors.length > 0) {
+                        alert("Please fill up the required fields:\n\n" + errors.join("• \n"));
+                        console.log("This code gets triggered")
+                        return;
+
+                    } 
+
+                    if (confirm_save_modal) {
+                        confirm_save_modal.hide();
+                    }
+                    enroll_user_modal.hide();
+
+                    var notif_modal_confirm_save = new bootstrap.Modal(document.getElementById('confirmSave'));
+                    notif_modal_confirm_save.show();
+
+    }
+    </script>
+
+
+
+<script>
+     //Javascript to get the user input in "Enroll administrator" modal to be inserted later on in python script
+        function insert_enroll_administrator() {
+
+            const confirmSaveElement = document.getElementById('confirmSave');
+            const confirm_save_modal = bootstrap.Modal.getInstance(confirmSaveElement);
+
+            const enrollModal = document.getElementById('enrolluser');
+            const enroll_user_modal = bootstrap.Modal.getInstance(enrollModal);
+
+            const user_id = document.getElementById('hidden_user_id').value;
+            const hcm_id = document.getElementById('txt_search_hcm').value;
+            const full_name = document.getElementById('txt_full_name').value;
+            const email = document.getElementById('txt_email').value;
+            const role_type = document.getElementById('ddl_role').value;
+            const sbu = document.getElementById('txt_sbu').value;
+            const job_position = document.getElementById('txt_job_position').value;
+            const ticket_number = document.getElementById('txt_ticket_number').value;
+            const access_start_date = document.getElementById('txt_access_date_start').value;
+            const access_end_date = document.getElementById('txt_access_date_end').value;
+
+
+            // More on checking nalang ako dito kung ano value nung "modal_mode", meron na ako pang event listener para sa edit, dito nalang sa button ng enroll
+            
+            const mode = document.getElementById('modal_mode').value; // 
+            // alert(`The user will perform ${mode}`)
+
+
+
+
+            // const hcm_id = document.getElementById('txt_search_hcm').value = ;
+
+            // const errors = [];
+
+            // if (!job_position) errors.push("Job Position is required.");
+            // if (!sbu) errors.push("SBU is required.");
+            // if (!email) errors.push("Email is required.");
+            // if (!hcm_id) errors.push("HCM ID is required.");
+            // if (!ticket_number) errors.push("Ticket Number is required.");
+            // if (!role_type) errors.push("Role Type is required.");
+            // if (!access_start_date) errors.push("Access Start Date is required.");
+            // if (!access_end_date) errors.push("Access End Date is required.");
+
+            // if (errors.length > 0) {
+            //     alert("Please fill up the required fields:\n\n" + errors.join("\n"));
+            //     return;
+            // }
+
+
+            if (confirm_save_modal) {
+                confirm_save_modal.hide();
+            }
+
+            var notif_modal = new bootstrap.Modal(document.getElementById('confirmSaveNotifLabel'));
+            notif_modal.show();
+
+            const administrator_details = {
+                user_id: user_id,
+                hcm_id: hcm_id,
+                email: email,
+                full_name: full_name,
+                sbu: sbu,
+                role_type: role_type,
+                job_position: job_position,
+                ticket_number: ticket_number,
+                access_start_date: access_start_date,
+                access_end_date: access_end_date,
+                mode: mode
+            }
+
+
+            fetch('/insert_enroll_administrator', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(administrator_details)
+            })
+                .then(response => response.json())
+                .then(data => {
+
+                    
+                    // Check if the response was successful and has a message
+                    if (data.status === 'success' && data.message) {
+                        // alert(data.message);
+                        window.location.reload();
+                    }  else if (data.status === 'error' && data.message === 'Please input a VALID HCM ID...') {
+                        alert(data.message);
+                        enroll_user_modal.show();
+                        notif_modal.hide();
+                    }   else if (data.status === 'error' && data.message) {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+</script>
+
+
+
+
+    <!-- Delete Administrator -->
+    <script>
+
+        //Delete Function
+        document.getElementById('btn_confirm_delete').addEventListener('click', async function () {
+            const confirmDeleteElement = document.getElementById('confirmDelete');
+            const confirm_delete_modal = bootstrap.Modal.getInstance(confirmDeleteElement);
+
+            if (confirm_delete_modal) {
+                confirm_delete_modal.hide();
+            }
+
+            var notif_modal = new bootstrap.Modal(document.getElementById('confirmDeleteNotif'));
+            notif_modal.show();
+
+            const data = {
+                user_id: document.getElementById('hidden_user_id').value || '',
+                deletion_reason: document.getElementById('txt_deletion_reason').value || ''
+            };
+
+            console.log(`This is the user id to be deleted: ${data}`)
+
+            try {
+                const response = await fetch('/delete_administrator', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    console.log("Deleted successfully:", result);
+                    // alert("Administrator deleted successfully.");
+                    window.location.reload();
+                } else {
+                    console.error("Delete failed:", result.message);
+                    alert("Failed to delete Administrator.");
+                }
+            } catch (error) {
+                console.error("Error occurred:", error);
+                alert("An error occurred.");
+            }
+        });
+    </script>
+
+
+
+    <!-- Validation in search in gridview -->
+    <script>
+        const retrieve_administrator_details_forms = document.getElementById('retrieve_administrator_details_forms');
+        const enrollModal = document.getElementById('enrolluser');
+        const enroll_user_modal = bootstrap.Modal.getInstance(enrollModal);
+
+        retrieve_administrator_details_forms.addEventListener('submit', function(event) {
+            const searchTextboxGridviewValue = document.getElementById('txt_search_employee').value;
+            // Prevent the form from submitting by default
+                    event.preventDefault(); 
+            if (searchTextboxGridviewValue.trim().length === 0) {
+                        // Prevents the default browser action (like submitting a form)
+
+                    alert("Please enter an HCM ID")
+                    console.log(searchTextboxGridviewValue.trim().length)
+                    return;  
+                    }
+                        console.log(searchTextboxGridviewValue.trim().length)
+                        retrieve_administrator_details_forms.submit();
+            
+        var notif_modal_search = new bootstrap.Modal(document.getElementById('searchAdminSpinner'));
+        notif_modal_search.show();
+
+    });
+    </script>
+
+
+    <!-- To get the user_id to be used later for Edit Query -->
+    <!-- Edit function javascript -->
+    <script>
+        const edit_btn = document.querySelectorAll('.grid-btn-edit');
+        var notif_modal_edit = new bootstrap.Modal(document.getElementById('enrolluser'));
+
+
+         //To properly get the user ID to be use in Edit function, 
+        document.addEventListener('DOMContentLoaded', function () {
+            //Call enroll modal and reuse it but in Edit mode
+            edit_btn.forEach(link => {
+                link.addEventListener('click', function () {
+                    document.getElementById('hidden_user_id').value = this.dataset.userid || '';
+
+                    //Set value "Edit" if user clicked the edit button to be validated in insert_enroll_administrator
+                    document.getElementById('modal_mode').value = "Edit"
+                    //Dito yung i sset ko pagiging dynamic nung sa header ng modal
+                    document.getElementById('lbl_modal_mode').textContent = "Edit Existing"
+                    document.getElementById('lbl_confirm_edit_insert').textContent = "apply changes for";
+                    document.getElementById('lbl_confirm_edit_insert_header').textContent = "Confirm Changes For";
+                    document.getElementById('span_search_hcm_id').textContent = "HCM ID:"
+
+                    document.getElementById('lbl_confirm_spinner_insert').innerHTML = `Applying changes for <p><p/> ${this.dataset.full_name}`;
+
+
+                    const mode = document.getElementById('modal_mode').value
+                    // alert(`The user will perform ${mode}`)
+
+                    const search_hcm_id_txt = document.getElementById('txt_search_hcm');
+                    const search_hcm_id_btn = document.getElementById('btn_search_hcm_id');
+
+                    btn_search_hcm_id.disabled = true;
+                    search_hcm_id_txt.readOnly = true;
+
+ 
+                    const hcm_id = this.dataset.hcm_id || '';
+                    const full_name = this.dataset.full_name || '';
+                    const sbu = this.dataset.sbu || '';
+                    const position = this.dataset.position || '';
+                    const role_type = this.dataset.role|| '';
+                    const access_start_date = this.dataset.access_start_date|| '';
+                    const access_end_date = this.dataset.access_end_date || '';
+                    const email = this.dataset.email || '';
+                    const ticket_number = this.dataset.ticket_number || '';
+
+                    console.log(`This is the start date :${access_start_date}`);
+                    console.log(`This is the end date :${access_end_date}`);
+
+
+                    document.getElementById('txt_search_hcm').value = hcm_id ;
+                    document.getElementById('txt_full_name').value = full_name ;                    
+                    document.getElementById('txt_email').value = email;
+                    document.getElementById('txt_ticket_number').value = ticket_number;
+                    document.getElementById('txt_job_position').value = position;
+                    document.getElementById('txt_sbu').value = sbu;
+                    document.getElementById('ddl_role').value = role_type;
+                    document.getElementById('txt_access_date_start').value = access_start_date;
+                    document.getElementById('txt_access_date_end').value = access_end_date;
+
+                    disableSaveChanges();
+                    notif_modal_edit.show();
+
+
+
+                    // const user_id = document.getElementById('hidden_user_id').value
+                    // alert(`The details of the employee to be edited are:  \n ${hcm_id} \n ${full_name}    \n ${sbu}   \n ${position} \n ${access_start_date} \n ${access_end_date} \n ${email} \n ${ticket_number} `);
+                });
+            });
+
+        });
+
+           
+
+
+
+        //     const userID = this.dataset.userid || ''
+        // console.log(`This is a user ID ${userID}`)
+    </script>
+
+
+
+
+    <!-- Will display in confirm save modal on who is to be added as new administrator -->
+    <script>
+
+        //Dito ko iallagay yung isa pang event listener na click at dito ko ilalagay yung document.getElementById('modal_mode').value = "Save";
+        //Hindi magandang placement yung document.getElementById('modal_mode').value = "Save"; sa save_btn, dapat naka hiwalay
+        //Ito yung event na pagka click doon sa navbar na "Enroll New User" i sset ko na mode = "Save", hindi yung nasa Save Changes
+        document.addEventListener('DOMContentLoaded', function () {
+        const open_enroll_modal = document.getElementById('open_enroll_modal');
+            open_enroll_modal.addEventListener('click', function() {
+
+                //Set input type hidden to "Save" to initialized later on in payload
+                document.getElementById('modal_mode').value = "Save";
+                document.getElementById('lbl_modal_mode').textContent = "Enroll New";
+                document.getElementById('lbl_confirm_edit_insert').textContent = "add administrator";
+                document.getElementById('lbl_confirm_edit_insert_header').textContent = "Confirm Add New ";
+                document.getElementById('lbl_confirm_spinner_insert').textContent = "Adding new Administrator";
+                document.getElementById('span_search_hcm_id').textContent = "Search HCM ID:";
+
+
+
+
+                
+
+                // alert("The mode will be Save")
+            });
+        });
+
+
+    </script>
+
+
+    <script>
+        //Function for searching HCM ID then passing it to API
+        async function search_hcm_id() {
+            const hcm_id = document.getElementById('txt_search_hcm').value;
+
+            try {
+
+                    if (hcm_id.trim().length === 0) {
+                        alert("Please input a HCM ID");
+                        return;
+                    }
+                    const enrollModal = document.getElementById('enrolluser');
+                    const enroll_user_modal = bootstrap.Modal.getInstance(enrollModal);
+
+                    var notif_modal_search = new bootstrap.Modal(document.getElementById('searchEmployeeEnrollSpinner'));
+                    notif_modal_search.show();
+                    enroll_user_modal.hide();
+                  
+                    // searchEmployeeEnrollSpinner yung name ng spinner para sa search hcm id
+
+                const response = await fetch('/search_hcm_id', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ hcm_id: hcm_id })
+                });
+                
+                // This is the correct way to check for a successful HTTP status
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(data.status)
+                
+                // Check if the response was successful based on your API's status field
+                if (data.status === 'success' && data.message) {
+                    // alert(data.message);
+
+                    const rows = data.result;
+                    console.log(rows);
+                    
+                    if (rows && rows.length > 0) {
+                        document.getElementById('txt_search_hcm').value = rows[0].hcm_id;
+                        document.getElementById('txt_full_name').value = rows[0].full_name;
+                        document.getElementById('txt_email').value = rows[0].email;
+                        document.getElementById('txt_sbu').value = rows[0].sbu;
+                        document.getElementById('txt_job_position').value = rows[0].job_position;
+
+                        disableSaveChanges();
+                        notif_modal_search.hide();
+                        enroll_user_modal.show();
+
+
+                    } else {
+                        // alert("No results found.");
+                        disableSaveChanges();
+                        notif_modal_search.hide();
+                        alert("No results found.");
+                        enroll_user_modal.show();
+                     
+                    }
+
+                } else if (data.status === 'error') {
+                    // alert(data.message);
+                    notif_modal_search.hide();
+                    alert(data.message);
+                    enroll_user_modal.show();
+                }
+
+            } catch (error) {
+                // This catches any network or parsing errors
+                console.error('Error:', error);
+                alert('An error occurred during the search.');
+                
+            }
+        }
+
+
+        // //Javascript to get the user input in "Enroll administrator" modal to be inserted later on in python script
+        // function insert_enroll_administrator() {
+
+        //     const confirmSaveElement = document.getElementById('confirmSave');
+        //     const confirm_save_modal = bootstrap.Modal.getInstance(confirmSaveElement);
+
+        //     const enrollModal = document.getElementById('enrolluser');
+        //     const enroll_user_modal = bootstrap.Modal.getInstance(enrollModal);
+
+        //     const user_id = document.getElementById('hidden_user_id').value;
+        //     const hcm_id = document.getElementById('txt_search_hcm').value;
+        //     const full_name = document.getElementById('txt_full_name').value;
+        //     const email = document.getElementById('txt_email').value;
+        //     const role_type = document.getElementById('ddl_role').value;
+        //     const sbu = document.getElementById('txt_sbu').value;
+        //     const job_position = document.getElementById('txt_job_position').value;
+        //     const ticket_number = document.getElementById('txt_ticket_number').value;
+        //     const access_start_date = document.getElementById('txt_access_date_start').value;
+        //     const access_end_date = document.getElementById('txt_access_date_end').value;
+
+
+        //     // More on checking nalang ako dito kung ano value nung "modal_mode", meron na ako pang event listener para sa edit, dito nalang sa button ng enroll
+            
+        //     const mode = document.getElementById('modal_mode').value; // 
+        //     alert(`The user will perform ${mode}`)
+
+
+
+
+        //     // const hcm_id = document.getElementById('txt_search_hcm').value = ;
+
+        //     // const errors = [];
+
+        //     // if (!job_position) errors.push("Job Position is required.");
+        //     // if (!sbu) errors.push("SBU is required.");
+        //     // if (!email) errors.push("Email is required.");
+        //     // if (!hcm_id) errors.push("HCM ID is required.");
+        //     // if (!ticket_number) errors.push("Ticket Number is required.");
+        //     // if (!role_type) errors.push("Role Type is required.");
+        //     // if (!access_start_date) errors.push("Access Start Date is required.");
+        //     // if (!access_end_date) errors.push("Access End Date is required.");
+
+        //     // if (errors.length > 0) {
+        //     //     alert("Please fill up the required fields:\n\n" + errors.join("\n"));
+        //     //     return;
+        //     // }
+
+
+        //     if (confirm_save_modal) {
+        //         confirm_save_modal.hide();
+        //     }
+
+        //     var notif_modal = new bootstrap.Modal(document.getElementById('confirmSaveNotifLabel'));
+        //     notif_modal.show();
+
+        //     const administrator_details = {
+        //         user_id: user_id,
+        //         hcm_id: hcm_id,
+        //         email: email,
+        //         full_name: full_name,
+        //         sbu: sbu,
+        //         role_type: role_type,
+        //         job_position: job_position,
+        //         ticket_number: ticket_number,
+        //         access_start_date: access_start_date,
+        //         access_end_date: access_end_date,
+        //         mode: mode
+        //     }
+
+
+        //     fetch('/insert_enroll_administrator', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify(administrator_details)
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+
+                    
+        //             // Check if the response was successful and has a message
+        //             if (data.status === 'success' && data.message) {
+        //                 alert(data.message);
+        //                 window.location.reload();
+        //             }  else if (data.status === 'error' && data.message === 'Please input a VALID HCM ID...') {
+        //                 alert(data.message);
+        //                 enroll_user_modal.show();
+        //                 notif_modal.hide();
+        //             }   else if (data.status === 'error' && data.message) {
+        //                 alert(data.message);
+        //                 window.location.reload();
+        //             }
+
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //         });
+        // }
+
+    </script>
+
+
+
+    <script>
+        //To properly get the user ID to be use in DELETE function
+        document.addEventListener('DOMContentLoaded', function () {
+            const delete_btn = document.querySelectorAll('.grid-btn-delete');
+
+
+            delete_btn.forEach(link => {
+                link.addEventListener('click', function () {
+                    document.getElementById('hidden_user_id').value = this.dataset.userid || '';
+                    document.getElementById('lbl_user_full_name').textContent = this.dataset.username || '';
+
+
+                });
+            });
+        });
+
+        
+    </script>
+
+
+    <script>
+    //To prevent user input of Alphabet and special characters for fields that is numbers only
+        const numberInput = document.getElementById('txt_ticket_number');
+
+        numberInput.addEventListener('input', function(event) {
+            // This regular expression checks for one or more numbers (0-9)
+            // and a global flag (g) to check the entire string.
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+
+    <!-- Disable or Enable the Yes button in Confirm Delete to ensure the deletion reason textbox is not empty -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const txt_deletion_reason = document.getElementById('txt_deletion_reason');
+            const disable_confirm_delete_button = document.getElementById('btn_confirm_delete');
+
+
+            // const grid_btn_delete = document.getElementById('grid-btn-delete');
+            console.log("Delete button was clicked")
+            txt_deletion_reason.addEventListener('input', function() {
+                // Trim() removes any leading or trailing whitespace.
+                // The condition checks if the trimmed value's length is 0.
+                if (txt_deletion_reason.value.trim().length === 0) {
+                    // If the textbox is empty, disable the button
+                    disable_confirm_delete_button.disabled = true;
+                } else {
+                    // If there's content, enable the button
+                    disable_confirm_delete_button.disabled = false;
+                }
+                console.log(txt_deletion_reason.value.trim().length)
+            });
+
+
+
+
+
+
+
+
+
+
+            
+
+
+        });
+    </script>
+
+
+
+    <script>
+        //Validate if textbox is empty, disable Save Changes button
+        document.addEventListener('DOMContentLoaded', function () {
+            const myModalEl = document.getElementById('enrolluser');
+            // const search_hcm_id_spanner = document.getElementById('span_search_hcm_id');
+            // const modal_mode = document.getElementById('modal_mode').value;
+
+            myModalEl.addEventListener('shown.bs.modal', function () {
+
+                console.log("The modal is now fully open!");
+                
+                // You can now populate data or perform other tasks.
+                disableSaveChanges();
+            });
+
+
+
+        });
+
+ 
+
+   
+
+
+    </script>
+
+<script>
+                //When "Save Changes" is clicked, display the user 
+            document.addEventListener('DOMContentLoaded', function () {
+            const save_btn = document.getElementById('btn_enroll_user_modal');
+            
+
+            save_btn.addEventListener('click', function() {
+                document.getElementById('lbl_add_admin').textContent = document.getElementById('txt_full_name').value || '';
+
+                //Set input type hidden to "Save" to initialized later on in payload
+                // document.getElementById('modal_mode').value = "Save";
+            });
+        });
+</script>
+
+ <script>
+        //Validation that clears the textboxes in Enroll Modal when "Close" was clicked or other "Close" button
+            document.addEventListener('DOMContentLoaded', function () {
+                const close_enroll = document.getElementById('btn_close_enroll_modal');
+                const close_delete = document.getElementById('btn_close_delete');
+                const notif_modal_enroll = document.getElementById('enrolluser');
+                const notif_confirm_delete = document.getElementById('confirmDelete');
+
+
+                //To properly handle search hcm textbox in edit mode
+                const search_hcm_id_txt = document.getElementById('txt_search_hcm');
+                const search_hcm_id_btn = document.getElementById('btn_search_hcm_id');
+
+
+                // The scope of this textboxes, dropdowns and dateinputs are only for Enroll New User Modal
+                const textboxes_modal_enroll = notif_modal_enroll.querySelectorAll('input[type="text"]');
+                // Get all select elements inside the modal.
+                const dropdowns_modal_enroll = notif_modal_enroll.querySelectorAll('select');
+                // Get all date inputs inside the modal.
+                const dateInputs_modal_enroll = notif_modal_enroll.querySelectorAll('input[type="date"]');
+
+
+                const textboxes_delete_confirm = notif_confirm_delete.querySelectorAll('input[type="text"]');
+
+
+
+                close_enroll.addEventListener('click', function() {
+                    console.log("CLOSED")
+                    disableSaveChanges();
+                    // notif_modal_edit.addEventListener('hide.bs.modal', function(event) {
+                        // 3. Get all input fields inside the modal.
+
+                        dropdowns_modal_enroll.forEach(dropdown => {
+                            dropdown.selectedIndex = 0;
+                        });
+
+                        console.log("Dropdownlist have been cleared.");
+
+                        dateInputs_modal_enroll.forEach(dateInput => {
+                            dateInput.value = '';
+                        });
+
+                        console.log("Datepickers have been cleared.");
+
+                        // 4. Loop through each textbox and clear its value.
+                        textboxes_modal_enroll.forEach(textbox => {
+                            textbox.value = '';
+                        });
+
+                        console.log("Modal textboxes have been cleared.");
+
+                        search_hcm_id_txt.readOnly = false;
+                        search_hcm_id_btn.disabled = false;
+
+
+
+                    // });
+
+                });
+
+
+                close_delete.addEventListener('click', function() {
+
+                    // 4. Loop through each textbox and clear its value.
+                    textboxes_delete_confirm.forEach(textbox => {
+                        textbox.value = '';
+                    });
+
+
+                    console.log("This script is triggered but it is not clearing.");
+
+                });
+
+
+
+            });
+
+    </script>
+
+
+
+
+</body>
+
+</html>
