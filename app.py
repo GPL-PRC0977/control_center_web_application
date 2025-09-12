@@ -82,7 +82,7 @@ def manage_users():
     user_details = get_user_details()
     return_processed = load_administrators()
     return render_template('users.html', headers=return_processed['headers'], data=return_processed['rows'], user=user_details['user'], full_name=user_details['full_name'],
-                           role_type=user_details['role_type'],
+                           role_type=user_details['role_type'], picture=user_details['picture'],
                            status='True')
 
 
