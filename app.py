@@ -7,11 +7,14 @@ from dotenv import load_dotenv
 from functions import validate_user, save_application_data, get_master_data, delete_application, get_modules, get_dimension, search_hcm_id, insert_enroll_administrator_function, delete_administrator, retrieve_administrator_details_to_gridview, load_administrators, log_api_activity
 import sys
 import traceback
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 
 def get_oauth_config_from_secret(project_id: str, secret_id: str) -> dict:
