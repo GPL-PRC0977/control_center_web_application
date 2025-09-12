@@ -1,3 +1,5 @@
+import json
+from google.cloud import secretmanager
 from flask import Flask, request, jsonify, render_template, url_for, session, redirect
 from authlib.integrations.flask_client import OAuth
 import os
@@ -12,16 +14,40 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 
+def get_oauth_config_from_secret(project_id: str, secret_id: str) -> dict:
+    secret_client = secretmanager.SecretManagerServiceClient()
+    secret_name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+
+    response = secret_client.access_secret_version(
+        request={"name": secret_name})
+    secret_payload = response.payload.data.decode("UTF-8")
+
+    # Parse the JSON string into a dictionary
+    oauth_config = json.loads(secret_payload)
+    return oauth_config
+
+
+oauth_secrets = get_oauth_config_from_secret(
+    os.getenv('EP_PROJECT_ID'), "google-oauth")
+
+client_id = oauth_secrets["GOOGLE_CLIENT_ID"]
+client_secret = oauth_secrets["GOOGLE_CLIENT_SECRET"]
+redirect_uri = oauth_secrets["GOOGLE_REDIRECT_URI"]
+
+print(f"Client ID: {client_id}")
+print(f"Client Secret: {client_secret}")
+print(f"Redirect URI: {redirect_uri}")
+
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
-    client_id=os.getenv('GOOGLE_CLIENT_ID'),
-    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    client_id=client_id,
+    client_secret=client_secret,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
         'scope': 'openid email profile'
     },
-    redirect_uri=os.getenv('GOOGLE_REDIRECT_URI'),
+    redirect_uri=redirect_uri,
 )
 
 

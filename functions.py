@@ -57,7 +57,7 @@ def get_secret(project_id: str, secret_id: str) -> str:
 
 api_key = get_secret(project_id=secret_project_id, secret_id=secret_id)
 
-domain = "http://127.0.0.1:5001/control_center"
+domain = "https://control-center-ednpoints-740032229271.us-west1.run.app/control_center"
 key = api_key
 
 
