@@ -163,7 +163,7 @@
                         <td class="text-center"><a href="#" class="grid-btn"><i class="bi bi-people-fill"></i></a>
                         </td>
                         <td class="text-center">
-                            {% if role_type == 'Administrator' %}
+                            {% if role_type == 'Super Administrator' %}
                             <a href="#" class="grid-btn-edit grid-btn" data-appid="{{ data.app_id }}"
                                 data-app_name="{{ data.app_name }}" data-status="{{ data.status }}"
                                 data-app_url="{{ data.app_url }}" data-owner="{{ data.app_owner }}"
@@ -175,7 +175,7 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if role_type == 'Administrator' %}
+                            {% if role_type == 'Super Administrator' %}
                             <a href="#" class="grid-btn-delete" data-bs-toggle="modal" data-bs-target="#confirmDelete"
                                 data-appname="{{ data.app_name }}" data-appid="{{ data.app_id }}"><i
                                     class="bi bi-trash3-fill"></i></a>

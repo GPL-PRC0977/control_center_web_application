@@ -63,7 +63,7 @@
                                 Quick Actions
                             </button>
                             <ul class="dropdown-menu rounded-0" style="font-size: 13px;">
-                                {% if role_type == 'Administrator' %}
+                                {% if role_type == 'Super Administrator' %}
                                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                         data-bs-target="#enrollapp">Enroll New Application</a></li>
                                 {% endif %}
@@ -191,6 +191,7 @@
                 </div>
             </div>
 
+            {% if role_type == 'Super Administrator' %}
             <div class="mt-5 mb-5">
                 <h6 class="text-uppercase text-secondary">
                     <i class="bi bi-people-fill"></i> Manage Admin Users
@@ -204,6 +205,7 @@
                     <i class="bi bi-gear"></i> Manage
                 </a>
             </div>
+            {% endif %}
 
             <div class="mb-5">
                 <h6 class="text-uppercase text-secondary">
