@@ -114,7 +114,7 @@
                             {% if data.dimension_count == 0 %}
                             {{ data.dimension_count }}
                             {% else %}
-                            <a href="#" class="dimension-link text-primary" data-app_id="{{ data.app_id }}"
+                            <a href="#" class="dimension-link text-primary show-modal" data-app_id="{{ data.app_id }}"
                                 data-app_name="{{ data.app_name }}">{{
                                 data.dimension_count }}</a>
                             {% endif %}
@@ -124,7 +124,7 @@
                             {% if data.module_count == 0 %}
                             data.module_count
                             {% else %}
-                            <a href="#" class="modules-link text-primary" data-app_id="{{ data.app_id }}"
+                            <a href="#" class="modules-link text-primary show-modal" data-app_id="{{ data.app_id }}"
                                 data-app_name="{{ data.app_name }}">{{
                                 data.module_count }}</a>
                             {% endif %}
@@ -164,7 +164,7 @@
                         </td>
                         <td class="text-center">
                             {% if role_type == 'Super Administrator' %}
-                            <a href="#" class="grid-btn-edit grid-btn" data-appid="{{ data.app_id }}"
+                            <a href="#" class="grid-btn-edit grid-btn show-modal" data-appid="{{ data.app_id }}"
                                 data-app_name="{{ data.app_name }}" data-status="{{ data.status }}"
                                 data-app_url="{{ data.app_url }}" data-owner="{{ data.app_owner }}"
                                 data-perm_read="{{ data.can_read }}" data-perm_write="{{ data.can_write }}"
@@ -417,6 +417,33 @@
 
 
     </div>
+
+
+
+    <script>
+        // Attach modal triggers
+        document.querySelectorAll('.show-modal').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                var please_wait = new bootstrap.Modal(document.getElementById('exampleModal'));
+                please_wait.show();
+            });
+        });
+
+        // Ensure modal is closed when coming back with browser navigation
+        window.addEventListener('pageshow', function () {
+            var modalEl = document.getElementById('exampleModal');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            } else {
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            }
+        });
+    </script>
+
 
     <script>
         function filterApps() {

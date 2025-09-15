@@ -52,7 +52,7 @@
                         </div>
                     </li> -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
+                        <a class="nav-link show-modal" href="/">
                             <i class="bi bi-house"></i>
                             Home</a>
                     </li>
@@ -201,7 +201,7 @@
                     <i class="bi bi-gear"></i> Manage
                 </button> -->
 
-                <a href="/manage_users" class="btn btn-outline-secondary btn-sm">
+                <a href="/manage_users" id="lnk_manage_user" class="btn btn-outline-secondary btn-sm show-modal">
                     <i class="bi bi-gear"></i> Manage
                 </a>
             </div>
@@ -251,7 +251,69 @@
 
 
     </div>
+
+
+    <!-- Button trigger modal -->
+    <div class="modal fade" id="exampleModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm bg-transparent border-0">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-body text-center bg-transparent border-0">
+                    <button class="btn btn-primary" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Redirecting... please wait...</span>
+                    </button>
+                    <!-- <div class="d-flex align-items-center">
+                        <strong role="status">Loading...</strong>
+                        <div class="spinner-border ms-auto" aria-hidden="true"></div>
+                    </div> -->
+                    <!-- <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p></p>
+                    Redirecting please wait... -->
+                    <!-- <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="75"
+                        aria-valuemin="0" aria-valuemax="100">
+
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+
+<script>
+    document.getElementById('lnk_manage_user').addEventListener('click', function () {
+        var please_wait = new bootstrap.Modal(document.getElementById('exampleModal'));
+        please_wait.show();
+    });
+</script>
+
+<script>
+    // Attach modal triggers
+    document.querySelectorAll('.show-modal').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            var please_wait = new bootstrap.Modal(document.getElementById('exampleModal'));
+            please_wait.show();
+        });
+    });
+
+    // Ensure modal is closed when coming back with browser navigation
+    window.addEventListener('pageshow', function () {
+        var modalEl = document.getElementById('exampleModal');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        } else {
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        }
+    });
+</script>
+
 
 <script>
     document.querySelectorAll('[data-bs-theme-value]').forEach(button => {
